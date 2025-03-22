@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Organizer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Navigation Drawer Menu items -->
+    <string name="menu_tasks">Tasks</string>
+    <string name="menu_lists">Lists</string>
+    <string name="menu_finished_tasks">Finished tasks</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_additionally">Additionally</string>
+    <string name="menu_about">About app</string>
+    <string name="menu_themes">Themes</string>
+</resources>

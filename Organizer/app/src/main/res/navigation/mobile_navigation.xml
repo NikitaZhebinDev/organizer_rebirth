@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_tasks">
+
+    <fragment
+        android:id="@+id/nav_tasks"
+        android:name="com.kita.organizer.ui.tasks.TasksFragment"
+        android:label="@string/menu_tasks"
+        tools:layout="@layout/fragment_tasks" />
+
+    <fragment
+        android:id="@+id/nav_lists"
+        android:name="com.kita.organizer.ui.lists.ListsFragment"
+        android:label="@string/menu_lists"
+        tools:layout="@layout/fragment_lists" />
+
+    <fragment
+        android:id="@+id/nav_finishedtasks"
+        android:name="com.kita.organizer.ui.finishedtasks.FinishedTasksFragment"
+        android:label="@string/menu_finished_tasks"
+        tools:layout="@layout/fragment_finished_tasks" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.kita.organizer.ui.settings.SettingsFragment"
+        android:label="@string/menu_settings"
+        tools:layout="@layout/fragment_settings" />
+</navigation>
