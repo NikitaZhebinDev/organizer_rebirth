@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Back Button on the Left -->
+    <!--<item
+        android:id="@+id/action_back"
+        android:title="Back"
+        android:icon="@drawable/ic_action_back_arrow"
+        app:showAsAction="ifRoom" />-->
+
+    <!-- Create/Apply Button on the Right of Toolbar-->
+    <item
+        android:id="@+id/create_new_task"
+        android:title="Apply"
+        android:icon="@drawable/ic_action_apply"
+        app:showAsAction="ifRoom" />
+</menu>
