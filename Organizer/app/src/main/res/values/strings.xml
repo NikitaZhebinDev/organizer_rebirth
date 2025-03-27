@@ -18,4 +18,14 @@
 
     <!-- Tool bar title -->
     <string name="new_task">New task</string>
+
+    <!-- New Task Activity UI elements text -->
+    <string name="do_u_got_a_task">Do you got a task?</string>
+    <string name="enter_ur_task">Enter task here</string>
+    <string name="set_date">Set date</string>
+    <string name="date_not_set">Date not set</string>
+    <string name="set_time">Set time</string>
+    <string name="time_not_set">Time not set</string>
+    <string name="repeat">Repeat</string>
+    <string name="add_to_list">Add to list</string>
 </resources>
