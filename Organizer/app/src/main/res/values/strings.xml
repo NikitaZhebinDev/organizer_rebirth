@@ -28,4 +28,13 @@
     <string name="time_not_set">Time not set</string>
     <string name="repeat">Repeat</string>
     <string name="add_to_list">Add to list</string>
+
+    <!-- Repeat options for task-->
+    <string-array name="repeat_options">
+        <item>No repeat</item>
+        <item>Once an Hour</item>
+        <item>Once a Day</item>
+        <item>Once a Week</item>
+        <item>Once a Year</item>
+    </string-array>
 </resources>

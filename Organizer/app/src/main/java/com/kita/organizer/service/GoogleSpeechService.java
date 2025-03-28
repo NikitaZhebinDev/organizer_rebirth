@@ -40,12 +40,12 @@ public class GoogleSpeechService {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...");
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now..."); // TODO add string
 
         try {
             speechLauncher.launch(intent);
         } catch (Exception e) {
-            Toast.makeText(context, "Speech recognition is not supported on your device", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Speech recognition is not supported on your device", Toast.LENGTH_SHORT).show(); // TODO add string
         }
     }
 
