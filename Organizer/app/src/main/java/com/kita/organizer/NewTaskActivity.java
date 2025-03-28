@@ -1,5 +1,6 @@
 package com.kita.organizer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -26,13 +29,19 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.kita.organizer.service.GoogleSpeechService;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class NewTaskActivity extends AppCompatActivity {
-    private static final int REQUEST_CODE_SPEECH_INPUT = 100;
+    private GoogleSpeechService googleSpeechService;
+    private final ActivityResultLauncher<Intent> speechLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                googleSpeechService.handleSpeechResult(result.getResultCode(), result.getData());
+            });
     private TextView editDate, editTime, textViewSetTime, textViewRepeat;
     private EditText editTask;
     private ImageButton imageBtnDate, imageBtnTime, imageBtnSpeak, imgBtnClearDate, imgBtnClearTime, imgBtnNewList;
@@ -54,6 +63,9 @@ public class NewTaskActivity extends AppCompatActivity {
         setupToolbar();
         initButtons();
         initTextViews();
+
+        googleSpeechService = new GoogleSpeechService(this, speechLauncher);
+        googleSpeechService.setSpeechListener(result -> editTask.setText(result));
     }
 
     private void initButtons() {
@@ -77,7 +89,7 @@ public class NewTaskActivity extends AppCompatActivity {
         imageBtnSpeak.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startVoiceRecognition();
+                googleSpeechService.startVoiceRecognition();
             }
         });
 
@@ -133,34 +145,6 @@ public class NewTaskActivity extends AppCompatActivity {
                 .toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
-    /**
-     * Voice Recognition via Google Speech API
-     * **/
-    private void startVoiceRecognition() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now...");
 
-        try {
-            startActivityForResult(intent, REQUEST_CODE_SPEECH_INPUT);
-        } catch (Exception e) {
-            Toast.makeText(this, "Speech recognition is not supported on your device", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Voice Recognition via Google Speech API
-     * **/
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_SPEECH_INPUT && resultCode == RESULT_OK && data != null) {
-            ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            if (result != null && !result.isEmpty()) {
-                editTask.setText(result.get(0));
-            }
-        }
-    }
 
 }
