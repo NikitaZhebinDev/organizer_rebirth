@@ -64,7 +64,6 @@ public class NewTaskActivity extends AppCompatActivity {
 
         // Retrieve repeat options from strings.xml
         repeatOptions = getResources().getStringArray(R.array.repeat_options);
-
     }
 
     private void initUIElements() {
@@ -185,7 +184,7 @@ public class NewTaskActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setSingleChoiceItems(repeatOptions, -1, (dialog, which) -> {
             // Update button text with selected option
-            btnRepeat.setText(repeatOptions[which]);
+            btnRepeat.setText(repeatOptions[which]); // which = RepeatOption from enum
             dialog.dismiss();
         });
 
