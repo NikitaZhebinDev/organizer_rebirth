@@ -24,10 +24,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.kita.organizer.data.dao.TaskDao;
+import com.kita.organizer.data.db.OrganizerDatabase;
+import com.kita.organizer.data.entity.RepeatOption;
+import com.kita.organizer.data.entity.Task;
 import com.kita.organizer.service.GoogleSpeechService;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class NewTaskActivity extends AppCompatActivity {
@@ -36,12 +44,15 @@ public class NewTaskActivity extends AppCompatActivity {
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 googleSpeechService.handleSpeechResult(result.getResultCode(), result.getData());
             });
-    private final Calendar calendar = Calendar.getInstance();
     private String[] repeatOptions;
     private TextView editDate, editTime, textViewSetTime, textViewRepeat;
     private EditText editTask;
     private ImageButton imageBtnDate, imageBtnTime, imageBtnSpeak, imgBtnClearDate, imgBtnClearTime, imgBtnNewList;
     private Button btnRepeat, btnAddToList;
+
+    private LocalDate selectedDate;
+    private LocalTime selectedTime;
+    private Integer selectedRepeatOption;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +68,7 @@ public class NewTaskActivity extends AppCompatActivity {
         });
 
         setupToolbar();
-        initUIElements();
+        setupUIElements();
 
         googleSpeechService = new GoogleSpeechService(this, speechLauncher);
         googleSpeechService.setSpeechListener(result -> editTask.setText(result));
@@ -66,7 +77,7 @@ public class NewTaskActivity extends AppCompatActivity {
         repeatOptions = getResources().getStringArray(R.array.repeat_options);
     }
 
-    private void initUIElements() {
+    private void setupUIElements() {
         // find UI elements
         imageBtnDate = findViewById(R.id.imageBtnDate);
         imageBtnTime = findViewById(R.id.imageBtnTime);
@@ -121,8 +132,19 @@ public class NewTaskActivity extends AppCompatActivity {
         });
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.create_new_task) {
-                // TODO: save task logic
-                Toast.makeText(NewTaskActivity.this, "It worked!", Toast.LENGTH_SHORT).show();
+                saveTask(editTask.getText().toString(),
+                        selectedDate,
+                        selectedTime,
+                        RepeatOption.fromValue(selectedRepeatOption),
+                        btnAddToList.getText().toString());
+                // TODO remove below
+                /*OrganizerDatabase db = OrganizerDatabase.getInstance(getApplicationContext());
+                TaskDao taskDao = db.taskDao();*/
+                Toast.makeText(NewTaskActivity.this, new Task(editTask.getText().toString(),
+                        selectedDate,
+                        selectedTime,
+                        RepeatOption.fromValue(selectedRepeatOption),
+                        btnAddToList.getText().toString()).toString(), Toast.LENGTH_LONG).show();
             }
             return false;
         });
@@ -139,44 +161,52 @@ public class NewTaskActivity extends AppCompatActivity {
     }
 
     private void showDatePickerDialog() {
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        // Get the current date using LocalDate
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+        int month = today.getMonthValue() - 1; // DatePicker expects month to be 0-based
+        int day = today.getDayOfMonth();
 
+        // Create and show the DatePickerDialog
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 this,
                 (view, selectedYear, selectedMonth, selectedDay) -> {
-                    calendar.set(selectedYear, selectedMonth, selectedDay);
-                    updateEditDate();
+                    selectedDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay); // Adding 1 to month for LocalDate
+                    updateEditDate(selectedDate);
                 },
                 year, month, day
         );
         datePickerDialog.show();
     }
 
-    private void updateEditDate() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("E, MMM dd, yyyy", Locale.getDefault());
-        editDate.setText(dateFormat.format(calendar.getTime()));
-    }
 
     private void showTimePickerDialog() {
         // Get the current time
-        Calendar calendar = Calendar.getInstance();
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
+        LocalTime now = LocalTime.now();
+        int hour = now.getHour();
+        int minute = now.getMinute();
 
         // Create and show the TimePickerDialog
         TimePickerDialog timePickerDialog = new TimePickerDialog(
                 this,
                 (view, selectedHour, selectedMinute) -> {
-                    // Format the time (e.g., 08:05 or 13:45)
-                    String formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute);
-                    editTime.setText(formattedTime);
+                    selectedTime = LocalTime.of(selectedHour, selectedMinute);
+                    updateEditTime(selectedTime);
                 },
                 hour, minute, true // true for 24-hour format, false for 12-hour format TODO add settings time format picker
         );
 
         timePickerDialog.show();
+    }
+
+    private void updateEditDate(LocalDate date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E, MMM dd, yyyy", Locale.getDefault());
+        editDate.setText(date.format(formatter));
+    }
+
+    private void updateEditTime(LocalTime time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault());
+        editTime.setText(time.format(formatter));
     }
 
     private void showRepeatOptionDialog() {
@@ -185,11 +215,22 @@ public class NewTaskActivity extends AppCompatActivity {
         builder.setSingleChoiceItems(repeatOptions, -1, (dialog, which) -> {
             // Update button text with selected option
             btnRepeat.setText(repeatOptions[which]); // which = RepeatOption from enum
+            selectedRepeatOption = which;
             dialog.dismiss();
         });
 
         // Show dialog
         builder.create().show();
+    }
+
+    private void saveTask(String text, LocalDate date, LocalTime time, RepeatOption repeatOption, String listName) {
+        new Thread(() -> {
+            OrganizerDatabase db = OrganizerDatabase.getInstance(getApplicationContext());
+            TaskDao taskDao = db.taskDao();
+
+            Task newTask = new Task(text, date, time, repeatOption, listName);
+            taskDao.insert(newTask);
+        }).start();
     }
 
 }

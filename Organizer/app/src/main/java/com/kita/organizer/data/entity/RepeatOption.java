@@ -1,4 +1,4 @@
-package com.kita.organizer.model;
+package com.kita.organizer.data.entity;
 
 public enum RepeatOption {
     NO_REPEAT(0),
