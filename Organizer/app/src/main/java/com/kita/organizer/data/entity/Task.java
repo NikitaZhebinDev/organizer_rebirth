@@ -1,6 +1,7 @@
 package com.kita.organizer.data.entity;
 
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -9,7 +10,15 @@ import com.kita.organizer.data.db.Converters;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Entity(tableName = "tasks")
+@Entity(
+        tableName = "task",
+        foreignKeys = @ForeignKey(
+                entity = ListEntity.class,
+                parentColumns = "id",
+                childColumns = "listId",
+                onDelete = ForeignKey.CASCADE
+        )
+)
 @TypeConverters({Converters.class})  // Tell Room to use custom converters
 public class Task {
     @PrimaryKey(autoGenerate = true)
@@ -18,14 +27,14 @@ public class Task {
     private LocalDate date;
     private LocalTime time;
     private RepeatOption repeatOption;
-    private String listName;
+    private int listId;  // foreign key reference
 
-    public Task(String text, LocalDate date, LocalTime time, RepeatOption repeatOption, String listName) {
+    public Task(String text, LocalDate date, LocalTime time, RepeatOption repeatOption, int listId) {
         this.text = text;
         this.date = date;
         this.time = time;
         this.repeatOption = repeatOption;
-        this.listName = listName;
+        this.listId = listId;
     }
 
     public void setId(int id) {
@@ -53,8 +62,8 @@ public class Task {
         return repeatOption;
     }
 
-    public String getListName() {
-        return listName;
+    public int getListId() {
+        return listId;
     }
 
     @Override
@@ -65,7 +74,7 @@ public class Task {
                 ", date=" + date +
                 ", time=" + time +
                 ", repeatOption=" + repeatOption +
-                ", listName='" + listName + '\'' +
+                ", listId=" + listId +
                 '}';
     }
 }

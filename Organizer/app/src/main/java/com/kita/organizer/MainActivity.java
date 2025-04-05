@@ -1,23 +1,26 @@
 package com.kita.organizer;
 
+import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.navigation.NavigationView;
-
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.navigation.NavigationView;
+import com.kita.organizer.data.dao.ListDao;
+import com.kita.organizer.data.db.OrganizerDatabase;
+import com.kita.organizer.data.entity.ListEntity;
 import com.kita.organizer.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
 
@@ -49,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        Log.d(TAG, "onCreate() called");
+        // Ensure default lists are added
+        insertDefaultListsIfNeeded(getApplicationContext());
     }
 
     @Override
@@ -64,4 +71,19 @@ public class MainActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+    public static void insertDefaultListsIfNeeded(Context context) {
+        new Thread(() -> {
+            OrganizerDatabase database = OrganizerDatabase.getInstance(context);
+            ListDao listDao = database.listDao();
+            if (listDao.getAll().isEmpty()) {
+                listDao.insert(new ListEntity("Default"));
+                listDao.insert(new ListEntity("Personal"));
+                Log.d(TAG, "Default lists added");
+            } else {
+                Log.d(TAG, "Default lists already present");
+            }
+        }).start();
+    }
+
 }

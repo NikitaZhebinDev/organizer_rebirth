@@ -34,16 +34,28 @@ public class TasksFragment extends Fragment {
         tasksViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         Animation animClickFloatBtn = AnimationUtils.loadAnimation(getContext(), R.anim.press_float_btn);
-
-        FloatingActionButton btnNewTask = binding.btnNewTask;
-        btnNewTask.setOnClickListener(new View.OnClickListener() {
+        animClickFloatBtn.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onClick(View v) {
-                btnNewTask.startAnimation(animClickFloatBtn);
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
                 // Start the new task activity
                 Intent intent = new Intent(getActivity(), NewTaskActivity.class);
                 startActivity(intent);
             }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        FloatingActionButton btnNewTask = binding.btnNewTask;
+        btnNewTask.setOnClickListener(v -> {
+            btnNewTask.startAnimation(animClickFloatBtn);
         });
 
         return root;

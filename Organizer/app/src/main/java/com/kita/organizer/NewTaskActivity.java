@@ -5,11 +5,14 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,21 +27,23 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.kita.organizer.data.dao.ListDao;
 import com.kita.organizer.data.dao.TaskDao;
 import com.kita.organizer.data.db.OrganizerDatabase;
+import com.kita.organizer.data.entity.ListEntity;
 import com.kita.organizer.data.entity.RepeatOption;
 import com.kita.organizer.data.entity.Task;
 import com.kita.organizer.service.GoogleSpeechService;
+import com.kita.organizer.util.DatabaseLogger;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class NewTaskActivity extends AppCompatActivity {
+    private static final String TAG = NewTaskActivity.class.getSimpleName();
     private GoogleSpeechService googleSpeechService;
     private final ActivityResultLauncher<Intent> speechLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -52,7 +57,7 @@ public class NewTaskActivity extends AppCompatActivity {
 
     private LocalDate selectedDate;
     private LocalTime selectedTime;
-    private Integer selectedRepeatOption;
+    private Integer selectedRepeatOption = RepeatOption.NO_REPEAT.getValue();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,14 +72,18 @@ public class NewTaskActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Retrieve repeat options from strings.xml
+        repeatOptions = getResources().getStringArray(R.array.repeat_options);
+
         setupToolbar();
         setupUIElements();
 
         googleSpeechService = new GoogleSpeechService(this, speechLauncher);
         googleSpeechService.setSpeechListener(result -> editTask.setText(result));
 
-        // Retrieve repeat options from strings.xml
-        repeatOptions = getResources().getStringArray(R.array.repeat_options);
+        // Log the lists present in the database when the app starts
+        DatabaseLogger.logListsInDatabase(TAG, getApplicationContext()); // todo remove
+        DatabaseLogger.logTasksInDatabase(TAG, getApplicationContext()); // todo remove
     }
 
     private void setupUIElements() {
@@ -84,8 +93,13 @@ public class NewTaskActivity extends AppCompatActivity {
         imgBtnClearDate = findViewById(R.id.imgBtnClearDate);
         imgBtnClearTime = findViewById(R.id.imgBtnClearTime);
         imgBtnNewList = findViewById(R.id.imgBtnNewList);
+
         btnRepeat = findViewById(R.id.btnRepeat);
+        btnRepeat.setText(repeatOptions[0]); // Default Repeat Option is NO_REPEAT
+
         btnAddToList = findViewById(R.id.btnAddToList);
+        btnAddToList.setText("Default"); // Preselect “Default” at Launch todo add internationalization?
+
         imageBtnSpeak = findViewById(R.id.imageBtnSpeak);
         editTask = findViewById(R.id.editTask);
         textViewSetTime = findViewById(R.id.textViewSetTime);
@@ -105,17 +119,12 @@ public class NewTaskActivity extends AppCompatActivity {
         imgBtnClearTime.setOnClickListener(v -> editTime.setText("")); // Clears the EditText field
 
         btnRepeat.setOnClickListener(v -> showRepeatOptionDialog());
+        btnAddToList.setOnClickListener(v -> showListSelectionDialog());
 
-        /* TODO
-        imgBtnNewList.setOnClickListener(this);
-        btnAddToList.setOnClickListener(this);*/
+        imgBtnNewList.setOnClickListener(v -> showAddListDialog());
 
-        // TODO btnRepeat.setText(DataBaseLists.listRepeatNames[0]);
-        // TODO btnAddToList.setText(DataBaseLists.defaultListsNames[0]);
-
-        // Request focus and show keyboard on activity startup
+        // Request focus -> it'll show keyboard on activity startup
         editTask.requestFocus();
-        showKeyboard();
     }
 
     private void setupToolbar() {
@@ -130,21 +139,15 @@ public class NewTaskActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> {
             finish();
         });
+
+        // When Apply button is clicked, save the task
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.create_new_task) {
-                saveTask(editTask.getText().toString(),
-                        selectedDate,
-                        selectedTime,
-                        RepeatOption.fromValue(selectedRepeatOption),
-                        btnAddToList.getText().toString());
-                // TODO remove below
-                /*OrganizerDatabase db = OrganizerDatabase.getInstance(getApplicationContext());
-                TaskDao taskDao = db.taskDao();*/
-                Toast.makeText(NewTaskActivity.this, new Task(editTask.getText().toString(),
-                        selectedDate,
-                        selectedTime,
-                        RepeatOption.fromValue(selectedRepeatOption),
-                        btnAddToList.getText().toString()).toString(), Toast.LENGTH_LONG).show();
+                String listName = btnAddToList.getText().toString();
+                String taskText = editTask.getText().toString();
+                RepeatOption repeatOption = RepeatOption.fromValue(selectedRepeatOption);
+
+                saveTaskToDatabase(taskText, selectedDate, selectedTime, repeatOption, listName);
             }
             return false;
         });
@@ -210,26 +213,167 @@ public class NewTaskActivity extends AppCompatActivity {
     }
 
     private void showRepeatOptionDialog() {
+        // Get the current text of the button
+        String currentButtonText = btnRepeat.getText().toString();
 
+        // Find the index of the repeat option that matches the button text
+        int preselectedIndex = -1;
+        for (int i = 0; i < repeatOptions.length; i++) {
+            if (repeatOptions[i].equals(currentButtonText)) {
+                preselectedIndex = i;
+                break;
+            }
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setSingleChoiceItems(repeatOptions, -1, (dialog, which) -> {
+        builder.setSingleChoiceItems(repeatOptions, preselectedIndex, (dialog, which) -> {
             // Update button text with selected option
-            btnRepeat.setText(repeatOptions[which]); // which = RepeatOption from enum
-            selectedRepeatOption = which;
+            btnRepeat.setText(repeatOptions[which]);
+            selectedRepeatOption = which;  // Update the selected option (index)
             dialog.dismiss();
-        });
-
-        // Show dialog
-        builder.create().show();
+        }).create().show();
     }
 
-    private void saveTask(String text, LocalDate date, LocalTime time, RepeatOption repeatOption, String listName) {
+    private void saveTaskToDatabase(String taskText, LocalDate date, LocalTime time, RepeatOption repeatOption, String listName) {
+        new Thread(() -> {
+            // Create an instance of the ListDao to get the ListEntity by name
+            ListDao listDao = OrganizerDatabase.getInstance(getApplicationContext()).listDao();
+            ListEntity listEntity = listDao.getByName(listName);
+            if (listEntity == null) {
+                // If the ListEntity doesn't exist, fallback to the "Default" list
+                listEntity = listDao.getByName("Default"); // todo add internationalization?
+            }
+
+            Task task = new Task(taskText, date, time, repeatOption, listEntity.getId());
+            TaskDao taskDao = OrganizerDatabase.getInstance(getApplicationContext()).taskDao();
+            taskDao.insert(task);
+
+            Log.d(TAG, "Task saved: " + task);
+        }).start();
+    }
+
+    private void showListSelectionDialog() {
         new Thread(() -> {
             OrganizerDatabase db = OrganizerDatabase.getInstance(getApplicationContext());
-            TaskDao taskDao = db.taskDao();
+            ListDao listDao = db.listDao();
+            List<ListEntity> lists = listDao.getAll();
 
-            Task newTask = new Task(text, date, time, repeatOption, listName);
-            taskDao.insert(newTask);
+            // Convert to array of names
+            String[] listNames = new String[lists.size()];
+            int defaultIndex = -1;
+            String currentListName = btnAddToList.getText().toString();  // Get the current text from the button
+
+            for (int i = 0; i < lists.size(); i++) {
+                listNames[i] = lists.get(i).getName();
+                if (currentListName.equalsIgnoreCase(listNames[i])) {
+                    defaultIndex = i;  // Set the selected index based on the button text
+                }
+            }
+
+            // If no match was found, fall back to "Default" list as default
+            if (defaultIndex == -1) {
+                for (int i = 0; i < lists.size(); i++) {
+                    if ("Default".equalsIgnoreCase(listNames[i])) {
+                        defaultIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            int finalDefaultIndex = defaultIndex;
+
+            runOnUiThread(() -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(NewTaskActivity.this);
+                builder.setSingleChoiceItems(listNames, finalDefaultIndex, (dialog, which) -> {
+                    btnAddToList.setText(listNames[which]); // Set button text
+                    dialog.dismiss();
+                }).show();
+            });
+        }).start();
+    }
+
+    // TODO add internationalization
+    private void showAddListDialog() {
+        // Create a LinearLayout container with vertical orientation
+        LinearLayout container = new LinearLayout(NewTaskActivity.this);
+        container.setOrientation(LinearLayout.VERTICAL);
+
+        // Convert dp values to pixels: horizontal margin and top margin
+        int horizontalMargin = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
+        int topMargin = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+
+        // Create layout parameters for EditText with margins
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(horizontalMargin, topMargin, horizontalMargin, 0);
+
+        // Create the EditText and apply layout parameters
+        final EditText input = new EditText(NewTaskActivity.this);
+        input.setHint("Enter list name");
+        input.setLayoutParams(lp);
+        container.addView(input);
+
+        // Build the dialog with the custom container
+        AlertDialog.Builder builder = new AlertDialog.Builder(NewTaskActivity.this);
+        builder.setTitle("New List")
+                .setView(container)
+                .setPositiveButton("Add", null)  // Override later
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        final AlertDialog dialog = builder.create();
+
+        // Override the positive button’s behavior
+        dialog.setOnShowListener(dialogInterface -> {
+            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            positiveButton.setOnClickListener(view -> {
+                String listName = input.getText().toString().trim();
+                if (listName.isEmpty()) {
+                    Toast.makeText(NewTaskActivity.this, "List name cannot be empty", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Extracted the duplicate check and insertion logic into another method
+                    validateAndAddList(listName, dialog);
+                }
+            });
+        });
+
+        dialog.show();
+    }
+
+    /**
+     * Checks if a list with the given name already exists. If it does, shows a warning;
+     * otherwise, adds the new list.
+     */
+    private void validateAndAddList(String listName, AlertDialog dialog) {
+        new Thread(() -> {
+            OrganizerDatabase db = OrganizerDatabase.getInstance(getApplicationContext());
+            ListDao listDao = db.listDao();
+
+            // Check for an existing list with the same name
+            ListEntity existingList = listDao.getByName(listName);
+            runOnUiThread(() -> {
+                if (existingList != null) {
+                    Toast.makeText(NewTaskActivity.this, "List already exists", Toast.LENGTH_SHORT).show();
+                } else {
+                    addNewListToDatabase(listName);
+                    dialog.dismiss();
+                }
+            });
+        }).start();
+    }
+
+    /**
+     * Inserts a new list into the database.
+     */
+    private void addNewListToDatabase(String newListName) {
+        new Thread(() -> {
+            OrganizerDatabase db = OrganizerDatabase.getInstance(getApplicationContext());
+            ListDao listDao = db.listDao();
+            listDao.insert(new ListEntity(newListName));
+            runOnUiThread(() -> {
+                Toast.makeText(NewTaskActivity.this, "New list added: " + newListName, Toast.LENGTH_SHORT).show();
+            });
         }).start();
     }
 
