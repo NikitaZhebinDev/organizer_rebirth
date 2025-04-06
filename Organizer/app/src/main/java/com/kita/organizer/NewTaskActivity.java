@@ -112,11 +112,23 @@ public class NewTaskActivity extends AppCompatActivity {
 
         imageBtnDate.setOnClickListener(v -> showDatePickerDialog());
         editDate.setOnClickListener(v -> showDatePickerDialog());
-        imgBtnClearDate.setOnClickListener(v -> editDate.setText("")); // Clears the EditText field
+        imgBtnClearDate.setOnClickListener(v -> {
+            editDate.setText("");
+            editTime.setText("");
+            btnRepeat.setText(repeatOptions[0]); // Default Repeat Option is NO_REPEAT
+            hideTimeSelectorSection();
+            hideRepeatOptionSelectorSection();
+            hideDateBtnClear();
+        });
 
         imageBtnTime.setOnClickListener(v -> showTimePickerDialog());
         editTime.setOnClickListener(v -> showTimePickerDialog());
-        imgBtnClearTime.setOnClickListener(v -> editTime.setText("")); // Clears the EditText field
+        imgBtnClearTime.setOnClickListener(v -> {
+            editTime.setText("");
+            btnRepeat.setText(repeatOptions[0]); // Default Repeat Option is NO_REPEAT
+            hideRepeatOptionSelectorSection();
+            hideTimeBtnClear();
+        });
 
         btnRepeat.setOnClickListener(v -> showRepeatOptionDialog());
         btnAddToList.setOnClickListener(v -> showListSelectionDialog());
@@ -125,6 +137,11 @@ public class NewTaskActivity extends AppCompatActivity {
 
         // Request focus -> it'll show keyboard on activity startup
         editTask.requestFocus();
+
+        hideTimeSelectorSection();
+        hideRepeatOptionSelectorSection();
+        hideDateBtnClear();
+        hideTimeBtnClear();
     }
 
     private void setupToolbar() {
@@ -143,24 +160,14 @@ public class NewTaskActivity extends AppCompatActivity {
         // When Apply button is clicked, save the task
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.create_new_task) {
-                String listName = btnAddToList.getText().toString();
                 String taskText = editTask.getText().toString();
+                String listName = btnAddToList.getText().toString();
                 RepeatOption repeatOption = RepeatOption.fromValue(selectedRepeatOption);
 
                 saveTaskToDatabase(taskText, selectedDate, selectedTime, repeatOption, listName);
             }
             return false;
         });
-    }
-
-    private void hideKeyboard(@NonNull View v) {
-        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                .hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    private void showKeyboard() {
-        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                .toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
     private void showDatePickerDialog() {
@@ -176,6 +183,8 @@ public class NewTaskActivity extends AppCompatActivity {
                 (view, selectedYear, selectedMonth, selectedDay) -> {
                     selectedDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay); // Adding 1 to month for LocalDate
                     updateEditDate(selectedDate);
+                    showDateBtnClear();
+                    showTimeSelectorSection();
                 },
                 year, month, day
         );
@@ -195,6 +204,8 @@ public class NewTaskActivity extends AppCompatActivity {
                 (view, selectedHour, selectedMinute) -> {
                     selectedTime = LocalTime.of(selectedHour, selectedMinute);
                     updateEditTime(selectedTime);
+                    showTimeBtnClear();
+                    showRepeatOptionSelectorSection();
                 },
                 hour, minute, true // true for 24-hour format, false for 12-hour format TODO add settings time format picker
         );
@@ -233,21 +244,31 @@ public class NewTaskActivity extends AppCompatActivity {
         }).create().show();
     }
 
+    // todo add internationalization
     private void saveTaskToDatabase(String taskText, LocalDate date, LocalTime time, RepeatOption repeatOption, String listName) {
+        taskText = taskText.trim();
+        if (taskText.isEmpty()) {
+            Toast.makeText(this, "Please enter a task", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String finalTaskText = taskText;
         new Thread(() -> {
             // Create an instance of the ListDao to get the ListEntity by name
             ListDao listDao = OrganizerDatabase.getInstance(getApplicationContext()).listDao();
             ListEntity listEntity = listDao.getByName(listName);
             if (listEntity == null) {
                 // If the ListEntity doesn't exist, fallback to the "Default" list
-                listEntity = listDao.getByName("Default"); // todo add internationalization?
+                listEntity = listDao.getByName("Default");
             }
 
-            Task task = new Task(taskText, date, time, repeatOption, listEntity.getId());
+            Task task = new Task(finalTaskText, date, time, repeatOption, listEntity.getId());
             TaskDao taskDao = OrganizerDatabase.getInstance(getApplicationContext()).taskDao();
             taskDao.insert(task);
 
+            runOnUiThread(() -> Toast.makeText(this, "Task added", Toast.LENGTH_SHORT).show());
             Log.d(TAG, "Task saved: " + task);
+            runOnUiThread(this::finish); // close NewTaskActivity
         }).start();
     }
 
@@ -375,6 +396,60 @@ public class NewTaskActivity extends AppCompatActivity {
                 Toast.makeText(NewTaskActivity.this, "New list added: " + newListName, Toast.LENGTH_SHORT).show();
             });
         }).start();
+    }
+
+    private void hideKeyboard(@NonNull View v) {
+        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    private void showKeyboard() {
+        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
+                .toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
+    private void hideTimeSelectorSection() {
+        textViewSetTime.setVisibility(View.GONE);
+        editTime.setVisibility(View.GONE);
+        imageBtnTime.setVisibility(View.GONE);
+        imgBtnClearTime.setVisibility(View.GONE);
+    }
+
+    private void showTimeSelectorSection() {
+        textViewSetTime.setVisibility(View.VISIBLE);
+        editTime.setVisibility(View.VISIBLE);
+        imageBtnTime.setVisibility(View.VISIBLE);
+        if (editTime.getText().toString().isEmpty()) {
+            imgBtnClearTime.setVisibility(View.GONE);
+        } else {
+            imgBtnClearTime.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideRepeatOptionSelectorSection() {
+        textViewRepeat.setVisibility(View.GONE);
+        btnRepeat.setVisibility(View.GONE);
+    }
+
+    private void showRepeatOptionSelectorSection() {
+        textViewRepeat.setVisibility(View.VISIBLE);
+        btnRepeat.setVisibility(View.VISIBLE);
+    }
+
+    private void hideDateBtnClear() {
+        imgBtnClearDate.setVisibility(View.GONE);
+    }
+
+    private void showDateBtnClear() {
+        imgBtnClearDate.setVisibility(View.VISIBLE);
+    }
+
+    private void hideTimeBtnClear() {
+        imgBtnClearTime.setVisibility(View.GONE);
+    }
+
+    private void showTimeBtnClear() {
+        imgBtnClearTime.setVisibility(View.VISIBLE);
     }
 
 }

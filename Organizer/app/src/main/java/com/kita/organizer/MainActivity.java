@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navigationView, navController);
 
         Log.d(TAG, "onCreate() called");
-        // Ensure default lists are added
+        // Ensure default lists are added ('Default' & 'Personal')
         insertDefaultListsIfNeeded(getApplicationContext());
     }
 
