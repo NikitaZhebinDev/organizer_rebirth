@@ -18,7 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kita.organizer.NewTaskActivity;
 import com.kita.organizer.R;
 import com.kita.organizer.data.db.OrganizerDatabase;
-import com.kita.organizer.data.entity.Task;
+import com.kita.organizer.data.entity.TaskEntity;
 import com.kita.organizer.databinding.FragmentTasksBinding;
 
 import java.util.List;
@@ -81,10 +81,10 @@ public class TasksFragment extends Fragment {
     private void loadTasksFromDatabase() {
         new Thread(() -> {
             OrganizerDatabase db = OrganizerDatabase.getInstance(requireContext());
-            List<Task> taskList = db.taskDao().getAllTasks();  // sort/filter if needed
+            List<TaskEntity> taskEntityList = db.taskDao().getAllTasks();  // sort/filter if needed
 
             requireActivity().runOnUiThread(() -> {
-                taskAdapter.setTasks(taskList);
+                taskAdapter.setTasks(taskEntityList);
             });
         }).start();
     }

@@ -4,7 +4,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -14,17 +13,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kita.organizer.R;
-import com.kita.organizer.data.entity.Task;
+import com.kita.organizer.data.entity.TaskEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
-    private List<Task> tasks = new ArrayList<>();
+    private List<TaskEntity> taskEntities = new ArrayList<>();
 
-    public void setTasks(List<Task> taskList) {
-        this.tasks = taskList;
+    public void setTasks(List<TaskEntity> taskEntityList) {
+        this.taskEntities = taskEntityList;
         notifyDataSetChanged();
     }
 
@@ -49,9 +48,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             repeatImage = itemView.findViewById(R.id.repeat_image);
         }
 
-        public void bind(Task task) {
+        public void bind(TaskEntity taskEntity) {
             // Set the task text
-            taskText.setText(task.getText());
+            taskText.setText(taskEntity.getText());
 
             // todo : Optionally, set the date if the task contains a valid date
             // (assuming task.getDate() returns a String; adjust as needed)
@@ -78,8 +77,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        Task task = tasks.get(position);
-        holder.bind(task);
+        TaskEntity taskEntity = taskEntities.get(position);
+        holder.bind(taskEntity);
 
         // Animate the item's appearance
         holder.itemView.setAlpha(0f);
@@ -94,7 +93,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public int getItemCount() {
-        return tasks.size();
+        return taskEntities.size();
     }
 }
 

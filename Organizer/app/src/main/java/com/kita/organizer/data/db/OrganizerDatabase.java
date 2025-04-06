@@ -1,23 +1,21 @@
 package com.kita.organizer.data.db;
 
 import android.content.Context;
-import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.kita.organizer.data.dao.ListDao;
 import com.kita.organizer.data.dao.TaskDao;
 import com.kita.organizer.data.entity.ListEntity;
-import com.kita.organizer.data.entity.Task;
-import com.kita.organizer.util.DatabaseLogger;
+import com.kita.organizer.data.entity.TaskEntity;
 
-import java.util.concurrent.Executors;
-
-@Database(entities = {Task.class, ListEntity.class}, version = 1)
+/**
+ * The Room database for the organizer app.
+ * exportSchema - will tell Room to export the schema files into the schemas directory, set in project's build.gradle (Module-level).
+ */
+@Database(entities = {TaskEntity.class, ListEntity.class}, version = 1, exportSchema = true)
 public abstract class OrganizerDatabase extends RoomDatabase {
 
     public abstract TaskDao taskDao();

@@ -7,7 +7,7 @@ import com.kita.organizer.data.dao.ListDao;
 import com.kita.organizer.data.dao.TaskDao;
 import com.kita.organizer.data.db.OrganizerDatabase;
 import com.kita.organizer.data.entity.ListEntity;
-import com.kita.organizer.data.entity.Task;
+import com.kita.organizer.data.entity.TaskEntity;
 
 import java.util.List;
 
@@ -43,19 +43,19 @@ public class DatabaseLogger {
         new Thread(() -> {
             OrganizerDatabase db = OrganizerDatabase.getInstance(context);
             TaskDao taskDao = db.taskDao();
-            List<Task> tasks = taskDao.getAllTasks();
+            List<TaskEntity> taskEntities = taskDao.getAllTasks();
 
             // Log each task found
-            for (Task task : tasks) {
+            for (TaskEntity taskEntity : taskEntities) {
                 Log.d(tag, "Task present: " +
-                        "ID: " + task.getId() + ", " +
-                        "Text: " + task.getText() + ", " +
-                        "Date: " + task.getDate() + ", " +
-                        "Time: " + task.getTime() + ", " +
-                        "Repeat: " + task.getRepeatOption() + ", " +
-                        "List ID: " + task.getListId());
+                        "ID: " + taskEntity.getId() + ", " +
+                        "Text: " + taskEntity.getText() + ", " +
+                        "Date: " + taskEntity.getDate() + ", " +
+                        "Time: " + taskEntity.getTime() + ", " +
+                        "Repeat: " + taskEntity.getRepeatOption() + ", " +
+                        "List ID: " + taskEntity.getListId());
             }
-            if (tasks.isEmpty()) {
+            if (taskEntities.isEmpty()) {
                 Log.d(tag, "No tasks found in the database.");
             }
         }).start();

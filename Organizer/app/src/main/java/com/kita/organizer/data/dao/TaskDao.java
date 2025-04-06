@@ -4,15 +4,15 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 
-import com.kita.organizer.data.entity.Task;
+import com.kita.organizer.data.entity.TaskEntity;
 
 import java.util.List;
 
 @Dao
 public interface TaskDao {
     @Insert
-    void insert(Task task);
+    void insert(TaskEntity taskEntity);
 
-    @Query("SELECT * FROM task")
-    List<Task> getAllTasks();
+    @Query("SELECT * FROM Task")
+    List<TaskEntity> getAllTasks();
 }

@@ -2,6 +2,7 @@ package com.kita.organizer.data.entity;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -17,10 +18,11 @@ import java.time.LocalTime;
                 parentColumns = "id",
                 childColumns = "listId",
                 onDelete = ForeignKey.CASCADE
-        )
+        ),
+        indices = {@Index(value = "listId")} // Create an index for listId
 )
 @TypeConverters({Converters.class})  // Tell Room to use custom converters
-public class Task {
+public class TaskEntity {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String text;
@@ -29,7 +31,7 @@ public class Task {
     private RepeatOption repeatOption;
     private int listId;  // foreign key reference
 
-    public Task(String text, LocalDate date, LocalTime time, RepeatOption repeatOption, int listId) {
+    public TaskEntity(String text, LocalDate date, LocalTime time, RepeatOption repeatOption, int listId) {
         this.text = text;
         this.date = date;
         this.time = time;

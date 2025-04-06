@@ -32,7 +32,7 @@ import com.kita.organizer.data.dao.TaskDao;
 import com.kita.organizer.data.db.OrganizerDatabase;
 import com.kita.organizer.data.entity.ListEntity;
 import com.kita.organizer.data.entity.RepeatOption;
-import com.kita.organizer.data.entity.Task;
+import com.kita.organizer.data.entity.TaskEntity;
 import com.kita.organizer.service.GoogleSpeechService;
 import com.kita.organizer.util.DatabaseLogger;
 
@@ -260,12 +260,12 @@ public class NewTaskActivity extends AppCompatActivity {
                 listEntity = listDao.getByName("Default");
             }
 
-            Task task = new Task(finalTaskText, date, time, repeatOption, listEntity.getId());
+            TaskEntity taskEntity = new TaskEntity(finalTaskText, date, time, repeatOption, listEntity.getId());
             TaskDao taskDao = OrganizerDatabase.getInstance(getApplicationContext()).taskDao();
-            taskDao.insert(task);
+            taskDao.insert(taskEntity);
 
             runOnUiThread(() -> Toast.makeText(this, "Task added", Toast.LENGTH_SHORT).show());
-            Log.d(TAG, "Task saved: " + task);
+            Log.d(TAG, "Task saved: " + taskEntity);
             runOnUiThread(this::finish); // close NewTaskActivity
         }).start();
     }
@@ -392,6 +392,8 @@ public class NewTaskActivity extends AppCompatActivity {
             listDao.insert(new ListEntity(newListName));
             runOnUiThread(() -> {
                 Toast.makeText(NewTaskActivity.this, "List '" + newListName + "' added", Toast.LENGTH_SHORT).show();
+                // pre-select the new list name
+                btnAddToList.setText(newListName);
             });
         }).start();
     }
