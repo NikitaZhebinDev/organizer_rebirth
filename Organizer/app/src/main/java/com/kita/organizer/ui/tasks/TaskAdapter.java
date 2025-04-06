@@ -6,6 +6,9 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,24 +29,48 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {
-        Button taskButton;
+        // The clickable container (styled as a button)
+        LinearLayout taskButton;
+        // The checkbox for completing the task
         CheckBox taskCheckBox;
+        // Text view for the task text
+        TextView taskText;
+        // Text view for the date (if applicable)
+        TextView taskDate;
+        // Image view for the repeat icon
+        ImageView repeatImage;
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
-            taskButton = itemView.findViewById(R.id.taskButton);
-            taskCheckBox = itemView.findViewById(R.id.taskCheckBox);
+            taskButton = itemView.findViewById(R.id.task_button);
+            taskCheckBox = itemView.findViewById(R.id.task_checkbox);
+            taskText = itemView.findViewById(R.id.task_text);
+            taskDate = itemView.findViewById(R.id.task_date);
+            repeatImage = itemView.findViewById(R.id.repeat_image);
         }
 
         public void bind(Task task) {
-            taskButton.setText(task.getText());
-            // TODO: handle checkbox or button click here if needed
+            // Set the task text
+            taskText.setText(task.getText());
+
+            // todo : Optionally, set the date if the task contains a valid date
+            // (assuming task.getDate() returns a String; adjust as needed)
+            /*if (task.getDate() != null) {
+                taskDate.setText(task.getDate());
+            } else {
+                taskDate.setText("");
+            }*/
+
+            // Set the checkbox state based on task completion
+            //taskCheckBox.setChecked(task.isCompleted());
+            // TODO: Bind the repeat icon (if applicable) or set click listeners on taskButton/taskCheckBox
         }
     }
 
     @NonNull
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Inflate the new item_task.xml layout
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_task, parent, false);
         return new TaskViewHolder(view);
@@ -51,9 +78,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        holder.bind(tasks.get(position));
+        Task task = tasks.get(position);
+        holder.bind(task);
 
-        // Animate item appearance
+        // Animate the item's appearance
         holder.itemView.setAlpha(0f);
         holder.itemView.setTranslationY(50f);
         holder.itemView.animate()

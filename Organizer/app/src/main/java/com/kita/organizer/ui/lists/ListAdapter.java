@@ -5,6 +5,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,31 +20,44 @@ import java.util.List;
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
 
     private List<ListEntity> listItems = new ArrayList<>();
+
     public void setLists(List<ListEntity> listItems) {
         this.listItems = listItems;
         notifyDataSetChanged();
     }
 
     static class ListViewHolder extends RecyclerView.ViewHolder {
-        Button listButton;
+        // Text view for displaying the list name
+        TextView listName;
+        // Buttons for edit and delete actions
+        ImageButton editButton;
+        ImageButton deleteButton;
 
         public ListViewHolder(@NonNull View itemView) {
             super(itemView);
-            listButton = itemView.findViewById(R.id.listButton);
+            listName = itemView.findViewById(R.id.list_name);
+            editButton = itemView.findViewById(R.id.edit_button);
+            deleteButton = itemView.findViewById(R.id.delete_button);
         }
 
         public void bind(ListEntity listEntity) {
-            listButton.setText(listEntity.getName());
-            // TODO: handle checkbox or button click here if needed
+            // Set the list name text
+            listName.setText(listEntity.getName());
+
+            // TODO: Add click listeners for editButton and deleteButton if needed
+            // For example:
+            // editButton.setOnClickListener(v -> { /* open edit dialog */ });
+            // deleteButton.setOnClickListener(v -> { /* confirm and delete list */ });
         }
     }
-
+    
     @NonNull
     @Override
     public ListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // Inflate the new item_list.xml layout (ensure the file name matches)
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_list, parent, false);
-        return new ListAdapter.ListViewHolder(view);
+        return new ListViewHolder(view);
     }
 
     @Override

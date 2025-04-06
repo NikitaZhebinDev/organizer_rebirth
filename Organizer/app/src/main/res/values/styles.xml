@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Buttons -->
+    <!-- Buttons - TODO: doesn't work yet -->
     <style name="BtnTaskStyle" parent="@style/Widget.AppCompat.Button.Colored">
+        <item name="colorPrimary">@color/btn_white</item>
+        <item name="colorPrimaryVariant">@color/btn_white</item>
         <item name="colorButtonNormal">@color/btn_white</item>
         <item name="android:background">@color/btn_white</item>
         <item name="colorControlHighlight">@color/btn_white_pressed</item>
