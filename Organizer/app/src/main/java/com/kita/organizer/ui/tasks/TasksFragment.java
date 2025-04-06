@@ -7,20 +7,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kita.organizer.NewTaskActivity;
 import com.kita.organizer.R;
+import com.kita.organizer.data.db.OrganizerDatabase;
+import com.kita.organizer.data.entity.Task;
 import com.kita.organizer.databinding.FragmentTasksBinding;
+
+import java.util.List;
 
 public class TasksFragment extends Fragment {
 
     private FragmentTasksBinding binding;
+    private RecyclerView recyclerView;
+    private TaskAdapter taskAdapter;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -30,8 +37,8 @@ public class TasksFragment extends Fragment {
         binding = FragmentTasksBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textHome;
-        tasksViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
+        /*final TextView textView = binding.textHome;
+        tasksViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);*/
 
         Animation animClickFloatBtn = AnimationUtils.loadAnimation(getContext(), R.anim.press_float_btn);
         animClickFloatBtn.setAnimationListener(new Animation.AnimationListener() {
@@ -58,7 +65,28 @@ public class TasksFragment extends Fragment {
             btnNewTask.startAnimation(animClickFloatBtn);
         });
 
+        // Set up RecyclerView and fill it with tasks
+        recyclerView = root.findViewById(R.id.recyclerViewTasks);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        taskAdapter = new TaskAdapter();
+        recyclerView.setAdapter(taskAdapter);
+        loadTasksFromDatabase();
+
         return root;
+    }
+
+    /**
+     * Load tasks from the database and update the RecyclerView adapter
+     */
+    private void loadTasksFromDatabase() {
+        new Thread(() -> {
+            OrganizerDatabase db = OrganizerDatabase.getInstance(requireContext());
+            List<Task> taskList = db.taskDao().getAllTasks();  // sort/filter if needed
+
+            requireActivity().runOnUiThread(() -> {
+                taskAdapter.setTasks(taskList);
+            });
+        }).start();
     }
 
     @Override

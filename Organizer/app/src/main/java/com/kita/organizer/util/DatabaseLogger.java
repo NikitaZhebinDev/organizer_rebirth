@@ -13,7 +13,11 @@ import java.util.List;
 
 public class DatabaseLogger {
 
-    // Method to log all lists in the database
+    /**
+     * Logs all lists in the database.
+     * @param tag - tag to use for logging
+     * @param context - context to use for database access
+     */
     public static void logListsInDatabase(String tag, Context context) {
         new Thread(() -> {
             OrganizerDatabase db = OrganizerDatabase.getInstance(context);
@@ -30,7 +34,11 @@ public class DatabaseLogger {
         }).start();
     }
 
-    // Method to log all tasks in the database
+    /**
+     * Logs all tasks in the database.
+     * @param tag - tag to use for logging
+     * @param context - context to use for database access
+     */
     public static void logTasksInDatabase(String tag, Context context) {
         new Thread(() -> {
             OrganizerDatabase db = OrganizerDatabase.getInstance(context);

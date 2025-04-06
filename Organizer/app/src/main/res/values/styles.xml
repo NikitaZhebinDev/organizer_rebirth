@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Buttons -->
+    <style name="BtnTaskStyle" parent="@style/Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/btn_white</item>
+        <item name="android:background">@color/btn_white</item>
+        <item name="colorControlHighlight">@color/btn_white_pressed</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:elevation">1dp</item>
+    </style>
+
+    <!--<style name="CustomButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:backgroundTint">@color/btn_white</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:elevation">1dp</item>
+    </style>-->
+
+</resources>

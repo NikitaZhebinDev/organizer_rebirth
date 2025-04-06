@@ -5,15 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingLeft="8dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="8dp"
     android:paddingRight="8dp">
 
 
     <Button
         android:id="@+id/taskButton"
+        style="@style/BtnTaskStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:elevation="1dp"
         android:text="Task Button some text  some text  some text some text some text some text some text some text some text some text some text some text some text some text some text some text some text some text"
+        android:textAlignment="textStart"
+        android:textAllCaps="false"
+        android:textSize="17sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"

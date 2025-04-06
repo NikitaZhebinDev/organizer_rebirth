@@ -144,12 +144,10 @@ public class NewTaskActivity extends AppCompatActivity {
         hideTimeBtnClear();
     }
 
+    /**
+     * Sets up the custom toolbar.
+     */
     private void setupToolbar() {
-        // remove default toolbar
-        // removed by theme adjustment with no action bar for activity in manifest file
-        /*getSupportActionBar().hide();*/
-
-        // Set the custom toolbar
         Toolbar toolbar = findViewById(R.id.toolbarNewTask);
         // Set Back button
         toolbar.setNavigationIcon(R.drawable.ic_action_back_arrow);
@@ -385,7 +383,7 @@ public class NewTaskActivity extends AppCompatActivity {
     }
 
     /**
-     * Inserts a new list into the database.
+     * Inserts a new list into the database. Todo add internationalization
      */
     private void addNewListToDatabase(String newListName) {
         new Thread(() -> {
@@ -393,7 +391,7 @@ public class NewTaskActivity extends AppCompatActivity {
             ListDao listDao = db.listDao();
             listDao.insert(new ListEntity(newListName));
             runOnUiThread(() -> {
-                Toast.makeText(NewTaskActivity.this, "New list added: " + newListName, Toast.LENGTH_SHORT).show();
+                Toast.makeText(NewTaskActivity.this, "List '" + newListName + "' added", Toast.LENGTH_SHORT).show();
             });
         }).start();
     }
