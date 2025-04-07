@@ -66,7 +66,7 @@ public class TasksFragment extends Fragment {
         });
 
         // Set up RecyclerView and fill it with tasks
-        recyclerView = root.findViewById(R.id.recyclerViewTasks);
+        recyclerView = root.findViewById(R.id.recycler_view_tasks);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         taskAdapter = new TaskAdapter();
         recyclerView.setAdapter(taskAdapter);

@@ -12,67 +12,87 @@
     app:cardElevation="12dp"
     app:strokeColor="@color/divider_color"
     app:strokeWidth="1dp">
-    <!-- android:clickable="true" -> Make entire card clickable -->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp">
 
-        <!-- Checkbox remains on the left -->
-        <CheckBox
-            android:id="@+id/task_checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!-- Task details container -->
+        <!-- Container for completed task details -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/task_container"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/task_checkbox"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <!-- Task Title -->
             <TextView
                 android:id="@+id/task_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Do extra workout!"
+                android:text="Completed Task Title"
                 android:textAppearance="?attr/textAppearanceSubtitle1"
                 android:textColor="@android:color/black"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Task Date -->
+            <!-- Original Date and Time -->
             <TextView
                 android:id="@+id/task_date"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="(Draft!) Sun, Apr 6, 2025 18:00"
+                android:text="Original Date and Time"
                 android:textAppearance="?attr/textAppearanceSubtitle2"
                 android:textColor="@android:color/darker_gray"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/repeat_image"
+                app:layout_constraintTop_toBottomOf="@id/task_text"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/task_text" />
+                app:layout_constraintEnd_toStartOf="@id/repeat_image" />
 
-            <!-- Repeat Icon -->
+            <!-- Repeat Icon positioned to the right of task_date -->
             <ImageView
                 android:id="@+id/repeat_image"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_repeat"
+                app:layout_constraintTop_toTopOf="@id/task_date"
                 app:layout_constraintBottom_toBottomOf="@id/task_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginStart="4dp" />
+
+            <!-- Restored List Name -->
+            <TextView
+                android:id="@+id/list_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="List Name"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintTop_toBottomOf="@id/task_date"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Completion Date -->
+            <TextView
+                android:id="@+id/completion_date"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Completion Date"
+                android:textAppearance="?attr/textAppearanceCaption"
+                android:textColor="@android:color/darker_gray"
+                app:layout_constraintTop_toBottomOf="@id/list_name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -13,7 +13,7 @@
     — it allows the list items to flow under any overlays if needed.
     -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewTasks"
+        android:id="@+id/recycler_view_tasks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="32dp"
@@ -23,10 +23,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/item_list_previous" />
+        tools:listitem="@layout/item_task" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btnNewTask"
+        android:id="@+id/btn_new_task"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
