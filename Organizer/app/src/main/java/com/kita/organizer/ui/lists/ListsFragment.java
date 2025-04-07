@@ -40,7 +40,7 @@ public class ListsFragment extends Fragment {
         // Set up RecyclerView and fill it with lists
         recyclerView = root.findViewById(R.id.recyclerViewLists);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        listAdapter = new ListAdapter();
+        listAdapter = new ListAdapter(OrganizerDatabase.getInstance(getContext()).listDao());
         recyclerView.setAdapter(listAdapter);
         loadListsFromDatabase();
 

@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.kita.organizer.data.entity.ListEntity;
 
@@ -12,8 +13,11 @@ import java.util.List;
 
 @Dao
 public interface ListDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(ListEntity listEntity);
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(ListEntity listEntity); // Change IGNORE to REPLACE
+
+    @Update
+    void update(ListEntity listEntity); // Add an update method
 
     @Query("SELECT * FROM list")
     List<ListEntity> getAll();
@@ -24,3 +28,4 @@ public interface ListDao {
     @Delete
     void delete(ListEntity listEntity);
 }
+

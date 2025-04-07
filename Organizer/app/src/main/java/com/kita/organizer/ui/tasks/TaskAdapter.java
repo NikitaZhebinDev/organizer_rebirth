@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kita.organizer.R;
 import com.kita.organizer.data.entity.TaskEntity;
+import com.kita.organizer.ui.lists.ListAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +89,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TaskEntity taskEntity = taskEntities.get(position);
         holder.bind(taskEntity, onTaskClickListener);
 
+        setItemAppearanceAnimation(holder);
+        setClickBounceAnimation(holder);
+    }
+
+    @Override
+    public int getItemCount() {
+        return taskEntities.size();
+    }
+
+    private void setItemAppearanceAnimation(@NonNull TaskViewHolder holder) {
         // Animate the item's appearance (optional)
         holder.itemView.setAlpha(0f);
         holder.itemView.setTranslationY(50f);
@@ -97,7 +108,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 .setDuration(300)
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
+    }
 
+    private void setClickBounceAnimation(@NonNull TaskViewHolder holder) {
         // Add touch listener for the "small-and-big" (bounce) animation
         holder.itemView.setOnTouchListener((view, event) -> {
             switch (event.getAction()) {
@@ -138,11 +151,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
             return false; // Let ripple and click events proceed.
         });
-
     }
 
-    @Override
-    public int getItemCount() {
-        return taskEntities.size();
-    }
 }
