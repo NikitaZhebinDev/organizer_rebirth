@@ -5,19 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:clickable="true"
+    android:focusable="true"
     android:stateListAnimator="@animator/card_elevation_animator"
     app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    app:strokeColor="@color/divider_color"
+    app:strokeWidth="1dp">
+    <!-- android:clickable="true" -> Make entire card clickable -->
 
-    <!-- Clickable container styled as a list item -->
+    <!-- Container for list content -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clickable_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
-        android:padding="12dp"
-        android:clickable="true"
-        android:focusable="true">
+        android:padding="12dp">
 
         <!-- List Name Text -->
         <TextView

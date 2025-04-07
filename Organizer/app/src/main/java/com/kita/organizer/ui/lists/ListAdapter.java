@@ -1,10 +1,11 @@
 package com.kita.organizer.ui.lists;
 
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Button;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -43,14 +44,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         public void bind(ListEntity listEntity) {
             // Set the list name text
             listName.setText(listEntity.getName());
-
-            // TODO: Add click listeners for editButton and deleteButton if needed
-            // For example:
-            // editButton.setOnClickListener(v -> { /* open edit dialog */ });
-            // deleteButton.setOnClickListener(v -> { /* confirm and delete list */ });
+            // TODO: Add click listeners for editButton and deleteButton if needed.
         }
     }
-    
+
     @NonNull
     @Override
     public ListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -73,6 +70,44 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
                 .setDuration(300)
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
+
+        // Add touch listener for scale (bounce) animation
+        holder.itemView.setOnTouchListener((view, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    view.animate()
+                            .scaleX(0.97f)
+                            .scaleY(0.97f)
+                            .setDuration(100)
+                            .setInterpolator(new DecelerateInterpolator())
+                            .start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    view.animate()
+                            .scaleX(1.03f)
+                            .scaleY(1.03f)
+                            .setDuration(50)
+                            .withEndAction(() -> view.animate()
+                                    .scaleX(1f)
+                                    .scaleY(1f)
+                                    .setDuration(150)
+                                    .setInterpolator(new OvershootInterpolator())
+                                    .withEndAction(() -> view.performClick())
+                                    .start())
+                            .start();
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    view.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(150)
+                            .setInterpolator(new DecelerateInterpolator())
+                            .withEndAction(() -> view.performClick())
+                            .start();
+                    break;
+            }
+            return false; // Allow ripple effect and normal click events to occur.
+        });
     }
 
     @Override
@@ -80,4 +115,3 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         return listItems.size();
     }
 }
-

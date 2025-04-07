@@ -1,9 +1,11 @@
 package com.kita.organizer.ui.tasks;
 
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,8 +41,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {
-
-        // Keep references for UI elements for binding
+        // References for UI elements for binding
         CheckBox taskCheckBox;
         TextView taskText;
         TextView taskDate;
@@ -48,7 +49,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
         public TaskViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Now using itemView directly as the clickable area
+            // Using itemView as the clickable area (i.e. the entire MaterialCardView)
             taskCheckBox = itemView.findViewById(R.id.task_checkbox);
             taskText = itemView.findViewById(R.id.task_text);
             taskDate = itemView.findViewById(R.id.task_date);
@@ -59,18 +60,12 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             // Set the task text
             taskText.setText(taskEntity.getText());
 
-            // Optionally set the date if applicable
-            // if (taskEntity.getDate() != null) {
-            //     taskDate.setText(taskEntity.getDate());
-            // } else {
-            //     taskDate.setText("");
-            // }
-
-            // Set the checkbox state if needed
+            // Optionally set the date or checkbox state if needed.
+            // taskDate.setText(taskEntity.getDate());
             // taskCheckBox.setChecked(taskEntity.isCompleted());
-            // You can also add listeners for checkbox or repeat icon if desired
 
-            // Make the entire itemView clickable
+            // Set a click listener on the entire itemView.
+            // Note: The performClick() call in the touch listener will trigger this.
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onTaskClick(taskEntity);
@@ -93,7 +88,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TaskEntity taskEntity = taskEntities.get(position);
         holder.bind(taskEntity, onTaskClickListener);
 
-        // Animate the item's appearance
+        // Animate the item's appearance (optional)
         holder.itemView.setAlpha(0f);
         holder.itemView.setTranslationY(50f);
         holder.itemView.animate()
@@ -102,6 +97,46 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 .setDuration(300)
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
+
+        // Add touch listener for the "small-and-big" (bounce) animation
+        holder.itemView.setOnTouchListener((view, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    view.animate()
+                            .scaleX(0.97f)
+                            .scaleY(0.97f)
+                            .setDuration(100)
+                            .setInterpolator(new DecelerateInterpolator())
+                            .start();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    view.animate()
+                            .scaleX(1.03f)
+                            .scaleY(1.03f)
+                            .setDuration(50)
+                            .withEndAction(() -> {
+                                view.animate()
+                                        .scaleX(1f)
+                                        .scaleY(1f)
+                                        .setDuration(150)
+                                        .setInterpolator(new OvershootInterpolator())
+                                        .withEndAction(() -> view.performClick())  // Call performClick for accessibility.
+                                        .start();
+                            })
+                            .start();
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                    view.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(150)
+                            .setInterpolator(new DecelerateInterpolator())
+                            .withEndAction(() -> view.performClick())  // Ensure performClick is called.
+                            .start();
+                    break;
+            }
+            return false; // Return false so that other click events and the ripple effect can occur.
+        });
     }
 
     @Override
