@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- When pressed, animate from 12dp down to 2dp -->
+    <item android:state_pressed="true">
+        <objectAnimator
+            android:propertyName="elevation"
+            android:valueFrom="12dp"
+            android:valueTo="2dp"
+            android:duration="150"
+            android:valueType="floatType" />
+    </item>
+    <!-- Default state: animate from 2dp up to 12dp -->
+    <item>
+        <objectAnimator
+            android:propertyName="elevation"
+            android:valueFrom="2dp"
+            android:valueTo="12dp"
+            android:duration="150"
+            android:valueType="floatType" />
+    </item>
+</selector>

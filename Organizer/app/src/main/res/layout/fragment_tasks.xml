@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.tasks.TasksFragment">
 
+    <!--
+    RecyclerView is set to match the parent with a bottom margin of 32dp,
+    which helps prevent the last item from being hidden behind the FAB.
+    Continuing to use clipToPadding="false" is a good practice
+    — it allows the list items to flow under any overlays if needed.
+    -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewTasks"
         android:layout_width="match_parent"

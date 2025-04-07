@@ -10,4 +10,6 @@
 
     <color name="btn_white">#ffffff</color>
     <color name="btn_white_pressed">#2edd92</color>
+
+    <color name="divider_color">#E0E0E0</color>
 </resources>
