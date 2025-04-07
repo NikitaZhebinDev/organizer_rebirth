@@ -75,28 +75,31 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
         holder.itemView.setOnTouchListener((view, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    // Scale down very gently
                     view.animate()
-                            .scaleX(0.97f)
-                            .scaleY(0.97f)
-                            .setDuration(100)
+                            .scaleX(0.98f)
+                            .scaleY(0.98f)
+                            .setDuration(120)
                             .setInterpolator(new DecelerateInterpolator())
                             .start();
                     break;
                 case MotionEvent.ACTION_UP:
+                    // On release, do a smooth pop (slightly overscaled) then settle back
                     view.animate()
-                            .scaleX(1.03f)
-                            .scaleY(1.03f)
-                            .setDuration(50)
+                            .scaleX(1.02f)
+                            .scaleY(1.02f)
+                            .setDuration(75)
                             .withEndAction(() -> view.animate()
                                     .scaleX(1f)
                                     .scaleY(1f)
                                     .setDuration(150)
-                                    .setInterpolator(new OvershootInterpolator())
-                                    .withEndAction(() -> view.performClick())
+                                    .setInterpolator(new OvershootInterpolator(2f))
+                                    .withEndAction(() -> view.performClick()) // Accessibility: call performClick()
                                     .start())
                             .start();
                     break;
                 case MotionEvent.ACTION_CANCEL:
+                    // If cancelled, return smoothly to normal scale
                     view.animate()
                             .scaleX(1f)
                             .scaleY(1f)
@@ -106,8 +109,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
                             .start();
                     break;
             }
-            return false; // Allow ripple effect and normal click events to occur.
+            return false; // Let ripple and click events proceed.
         });
+
     }
 
     @Override
