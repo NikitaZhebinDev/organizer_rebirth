@@ -1,6 +1,5 @@
 package com.kita.organizer.ui.lists;
 
-import static com.google.android.material.internal.ViewUtils.showKeyboard;
 import static com.kita.organizer.utils.DialogUtils.wrapInVerticalContainer;
 
 import android.content.Context;
@@ -118,12 +117,22 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
 
     public void showListDeleteDialog(Context context, ListEntity listEntity, int adapterPosition, ListDao listDao) {
+        // Add a message warning about task deletion
+        String message = "Are you sure you want to delete the list: " + listEntity.getName() + "?\n\n" +
+                "Please note that all tasks within this list will also be deleted.";
+
         new AlertDialog.Builder(context)
-                .setTitle("Are you sure you want to delete the list: " + listEntity.getName() + "?")
+                .setTitle("Delete list?")
+                .setMessage(message) // Adding the message here
                 .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                 .setPositiveButton("Yes", (dialog, which) -> {
                     // Run deletion on a background thread
                     Executors.newSingleThreadExecutor().execute(() -> {
+                        // todo Optionally, you can delete tasks here before deleting the list
+                        // todo
+                        //OrganizerDatabase.getInstance(context).taskDao().deleteByListId(listEntity.getId());
+
+                        // Delete the list
                         listDao.delete(listEntity);
                     });
 

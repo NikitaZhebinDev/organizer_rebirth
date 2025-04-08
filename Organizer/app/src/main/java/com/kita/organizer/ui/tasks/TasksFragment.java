@@ -28,51 +28,52 @@ public class TasksFragment extends Fragment {
     private FragmentTasksBinding binding;
     private RecyclerView recyclerView;
     private TaskAdapter taskAdapter;
+    private TasksViewModel tasksViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        TasksViewModel tasksViewModel =
-                new ViewModelProvider(this).get(TasksViewModel.class);
 
         binding = FragmentTasksBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        /*final TextView textView = binding.textHome;
-        tasksViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);*/
+        tasksViewModel = new ViewModelProvider(this).get(TasksViewModel.class);
 
         Animation animClickFloatBtn = AnimationUtils.loadAnimation(getContext(), R.anim.press_float_btn);
         animClickFloatBtn.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
+            @Override public void onAnimationStart(Animation animation) {}
+            @Override public void onAnimationRepeat(Animation animation) {}
             @Override
             public void onAnimationEnd(Animation animation) {
-                // Start the new task activity
+                // Start new task activity
                 Intent intent = new Intent(getActivity(), NewTaskActivity.class);
                 startActivity(intent);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
             }
         });
 
         FloatingActionButton btnNewTask = binding.btnNewTask;
-        btnNewTask.setOnClickListener(v -> {
-            btnNewTask.startAnimation(animClickFloatBtn);
-        });
+        btnNewTask.setOnClickListener(v -> btnNewTask.startAnimation(animClickFloatBtn));
 
         // Set up RecyclerView and fill it with tasks
         recyclerView = root.findViewById(R.id.recycler_view_tasks);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         taskAdapter = new TaskAdapter();
         recyclerView.setAdapter(taskAdapter);
-        loadTasksFromDatabase();
+
+        // Observe LiveData instead of manually loading
+        tasksViewModel.getTasks().observe(getViewLifecycleOwner(), tasks -> {
+            taskAdapter.setTasks(tasks);
+        });
+
+        // Load tasks initially
+        tasksViewModel.loadTasks(requireContext());
 
         return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        tasksViewModel.loadTasks(requireContext()); // Refresh when coming back
     }
 
     /**

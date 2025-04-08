@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".ui.tasks.TasksFragment">
 
+    <!-- Background image shown only when task list is empty -->
+    <ImageView
+        android:id="@+id/empty_list_of_tasks_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/background_no_data"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
     <!--
     RecyclerView is set to match the parent with a bottom margin of 32dp,
     which helps prevent the last item from being hidden behind the FAB.
@@ -17,8 +30,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="32dp"
-        android:padding="8dp"
         android:clipToPadding="false"
+        android:padding="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

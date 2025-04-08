@@ -4,8 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -15,10 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.kita.organizer.R;
 import com.kita.organizer.data.db.OrganizerDatabase;
-import com.kita.organizer.data.entity.ListEntity;
 import com.kita.organizer.databinding.FragmentListsBinding;
-
-import java.util.List;
 
 public class ListsFragment extends Fragment {
 
@@ -29,7 +24,10 @@ public class ListsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         ListsViewModel listsViewModel =
-                new ViewModelProvider(this).get(ListsViewModel.class);
+                new ViewModelProvider(
+                        this,
+                        ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())
+                ).get(ListsViewModel.class);
 
         binding = FragmentListsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
@@ -42,25 +40,12 @@ public class ListsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         listAdapter = new ListAdapter(OrganizerDatabase.getInstance(getContext()).listDao());
         recyclerView.setAdapter(listAdapter);
-        loadListsFromDatabase();
+
+        listsViewModel.getAllLists().observe(getViewLifecycleOwner(), listEntities -> {
+            listAdapter.setLists(listEntities);
+        });
 
         return root;
-    }
-
-    /**
-     * Load lists from the database and update the RecyclerView adapter
-     */
-    private void loadListsFromDatabase() {
-        new Thread(() -> {
-            List<ListEntity> allLists = OrganizerDatabase
-                    .getInstance(getContext())
-                    .listDao()
-                    .getAll(); // sort/filter if needed
-
-            requireActivity().runOnUiThread(() -> {
-                listAdapter.setLists(allLists);
-            });
-        }).start();
     }
 
     @Override

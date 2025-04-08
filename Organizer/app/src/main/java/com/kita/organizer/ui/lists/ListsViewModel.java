@@ -1,19 +1,27 @@
 package com.kita.organizer.ui.lists;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-public class ListsViewModel extends ViewModel {
+import com.kita.organizer.data.db.OrganizerDatabase;
+import com.kita.organizer.data.entity.ListEntity;
 
-    private final MutableLiveData<String> mText;
+import java.util.List;
 
-    public ListsViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is lists fragment");
+public class ListsViewModel extends AndroidViewModel {
+
+    private final LiveData<List<ListEntity>> allLists;
+
+    public ListsViewModel(@NonNull Application application) {
+        super(application);
+        // Use getAllLive() from ListDao to observe the list of lists
+        allLists = OrganizerDatabase.getInstance(application).listDao().getAllLive();
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<List<ListEntity>> getAllLists() {
+        return allLists;
     }
 }

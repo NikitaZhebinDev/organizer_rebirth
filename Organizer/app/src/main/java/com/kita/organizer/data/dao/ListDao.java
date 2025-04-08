@@ -1,5 +1,6 @@
 package com.kita.organizer.data.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -17,10 +18,13 @@ public interface ListDao {
     void insert(ListEntity listEntity); // Change IGNORE to REPLACE
 
     @Update
-    void update(ListEntity listEntity); // Add an update method
+    void update(ListEntity listEntity);
 
     @Query("SELECT * FROM list")
     List<ListEntity> getAll();
+
+    @Query("SELECT * FROM list")
+    LiveData<List<ListEntity>> getAllLive();
 
     @Query("SELECT * FROM list WHERE name = :name LIMIT 1")
     ListEntity getByName(String name);

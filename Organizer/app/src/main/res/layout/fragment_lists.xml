@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     tools:context=".ui.lists.ListsFragment">
 
+    <!-- Background image shown only when list of lists is empty -->
+    <ImageView
+        android:id="@+id/empty_list_of_lists_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/background_no_data"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewLists"
         android:layout_width="match_parent"

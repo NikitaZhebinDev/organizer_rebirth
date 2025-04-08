@@ -87,22 +87,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
          */
         private void showCompleteTaskDialog(TaskEntity taskEntity) {
             Context context = itemView.getContext();
-            new AlertDialog.Builder(context)
+            AlertDialog dialog = new AlertDialog.Builder(context)
                     .setTitle("Mark as Complete?")
-                    .setNegativeButton("No", (dialog, which) -> {
-                        dialog.dismiss();
-                        // Uncheck the checkbox if user selects "No"
+                    .setNegativeButton("No", (d, which) -> {
+                        d.dismiss();
                         taskCheckBox.setChecked(false);
                     })
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        // Execute database operations on a background thread.
+                    .setPositiveButton("Yes", (d, which) -> {
                         new Thread(() -> {
                             OrganizerDatabase database = OrganizerDatabase.getInstance(context);
-                            // Retrieve the list name using the list id.
                             ListEntity listEntity = database.listDao().getById(taskEntity.getListId());
                             String listName = (listEntity != null) ? listEntity.getName() : "";
 
-                            // Create a CompletedTaskEntity with the current date as the completion date.
                             CompletedTaskEntity completedTask = new CompletedTaskEntity(
                                     taskEntity.getText(),
                                     taskEntity.getDate(),
@@ -113,12 +109,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                                     LocalDate.now()
                             );
 
-                            // Insert into CompletedTasks and delete from Tasks.
                             database.completedTaskDao().insert(completedTask);
                             database.taskDao().delete(taskEntity);
                         }).start();
                     })
-                    .show();
+                    .create();
+
+            // Set a listener to handle the case when the dialog is dismissed
+            dialog.setOnDismissListener(d -> taskCheckBox.setChecked(false));
+
+            dialog.show();
         }
     }
 
