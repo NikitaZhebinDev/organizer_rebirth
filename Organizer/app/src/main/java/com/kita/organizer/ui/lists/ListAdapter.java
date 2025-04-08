@@ -1,6 +1,7 @@
 package com.kita.organizer.ui.lists;
 
 import static com.google.android.material.internal.ViewUtils.showKeyboard;
+import static com.kita.organizer.utils.DialogUtils.wrapInVerticalContainer;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -94,7 +95,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
         new AlertDialog.Builder(context)
                 .setTitle("Rename list")
-                .setView(listNameInput)
+                .setView(wrapInVerticalContainer(listNameInput))
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .setPositiveButton("Rename", (dialog, which) -> {
                     String newName = listNameInput.getText().toString().trim();
@@ -118,7 +119,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
 
     public void showListDeleteDialog(Context context, ListEntity listEntity, int adapterPosition, ListDao listDao) {
         new AlertDialog.Builder(context)
-                .setTitle("List " + listEntity.getName() + " will be deleted. Are you sure?")
+                .setTitle("Are you sure you want to delete the list: " + listEntity.getName() + "?")
                 .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
                 .setPositiveButton("Yes", (dialog, which) -> {
                     // Run deletion on a background thread

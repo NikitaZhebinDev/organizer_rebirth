@@ -2,6 +2,7 @@ package com.kita.organizer.utils;
 
 import android.content.Context;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -31,6 +32,14 @@ public class DialogUtils {
         }
 
         return input;
+    }
+
+    public static View wrapInVerticalContainer(View child) {
+        Context context = child.getContext();
+        LinearLayout container = new LinearLayout(context);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.addView(child);
+        return container;
     }
 
 }

@@ -1,5 +1,7 @@
 package com.kita.organizer;
 
+import static com.kita.organizer.utils.DialogUtils.wrapInVerticalContainer;
+
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -321,11 +323,11 @@ public class NewTaskActivity extends AppCompatActivity {
      * the list if input is valid.
      */
     private void showAddListDialog() {
-        EditText input = DialogUtils.createStyledEditText(this, "Enter list name", null);
+        EditText listNameInput = DialogUtils.createStyledEditText(this, "Enter list name", null);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("New List")
-                .setView(wrapInVerticalContainer(input))
+                .setView(wrapInVerticalContainer(listNameInput))
                 .setPositiveButton("Add", null)
                 .setNegativeButton("Cancel", (d, w) -> d.dismiss())
                 .create();
@@ -333,7 +335,7 @@ public class NewTaskActivity extends AppCompatActivity {
         dialog.setOnShowListener(d -> {
             Button addButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
             addButton.setOnClickListener(v -> {
-                String name = input.getText().toString().trim();
+                String name = listNameInput.getText().toString().trim();
                 if (name.isEmpty()) {
                     Toast.makeText(this, "List name cannot be empty", Toast.LENGTH_SHORT).show();
                 } else {
@@ -343,7 +345,7 @@ public class NewTaskActivity extends AppCompatActivity {
         });
 
         dialog.show();
-        KeyboardUtils.showKeyboard(this, input);
+        KeyboardUtils.showKeyboard(this, listNameInput);
     }
 
 
@@ -427,12 +429,5 @@ public class NewTaskActivity extends AppCompatActivity {
 
     private void showTimeBtnClear() {
         imgBtnClearTime.setVisibility(View.VISIBLE);
-    }
-
-    private View wrapInVerticalContainer(View child) {
-        LinearLayout container = new LinearLayout(this);
-        container.setOrientation(LinearLayout.VERTICAL);
-        container.addView(child);
-        return container;
     }
 }
