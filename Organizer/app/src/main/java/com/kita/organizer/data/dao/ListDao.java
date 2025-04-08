@@ -25,6 +25,9 @@ public interface ListDao {
     @Query("SELECT * FROM list WHERE name = :name LIMIT 1")
     ListEntity getByName(String name);
 
+    @Query("SELECT * FROM list WHERE id = :id LIMIT 1")
+    ListEntity getById(int id);
+
     @Delete
     void delete(ListEntity listEntity);
 }

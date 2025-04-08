@@ -1,4 +1,4 @@
-package com.kita.organizer.util;
+package com.kita.organizer.utils;
 
 import android.content.Context;
 import android.util.Log;

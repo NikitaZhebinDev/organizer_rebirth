@@ -1,5 +1,7 @@
 package com.kita.organizer.ui.lists;
 
+import static com.google.android.material.internal.ViewUtils.showKeyboard;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -18,6 +20,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.kita.organizer.R;
 import com.kita.organizer.data.dao.ListDao;
 import com.kita.organizer.data.entity.ListEntity;
+import com.kita.organizer.utils.DialogUtils;
+import com.kita.organizer.utils.KeyboardUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,18 +90,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
     }
 
     public void showListRenameDialog(Context context, ListEntity listEntity, int adapterPosition, ListDao listDao) {
-        EditText editText = new EditText(context);
-        editText.setHint("Enter new name");
-        editText.setText(listEntity.getName()); // Pre-fill with current list name
-        editText.setPadding(32, 32, 32, 32);
-        editText.setSelection(editText.getText().length()); // Move cursor to end
+        EditText listNameInput = DialogUtils.createStyledEditText(context, "Enter new name", listEntity.getName());
 
         new AlertDialog.Builder(context)
                 .setTitle("Rename list")
-                .setView(editText)
+                .setView(listNameInput)
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .setPositiveButton("Rename", (dialog, which) -> {
-                    String newName = editText.getText().toString().trim();
+                    String newName = listNameInput.getText().toString().trim();
                     if (!newName.isEmpty()) {
                         listEntity.setName(newName);
 
@@ -110,6 +110,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
                     }
                 })
                 .show();
+
+        // Request focus for the input field and show the keyboard
+        KeyboardUtils.showKeyboard(context, listNameInput);
     }
 
 

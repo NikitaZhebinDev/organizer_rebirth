@@ -5,6 +5,8 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -34,7 +36,9 @@ import com.kita.organizer.data.entity.ListEntity;
 import com.kita.organizer.data.entity.RepeatOption;
 import com.kita.organizer.data.entity.TaskEntity;
 import com.kita.organizer.service.GoogleSpeechService;
-import com.kita.organizer.util.DatabaseLogger;
+import com.kita.organizer.utils.DatabaseLogger;
+import com.kita.organizer.utils.DialogUtils;
+import com.kita.organizer.utils.KeyboardUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -311,54 +315,37 @@ public class NewTaskActivity extends AppCompatActivity {
     }
 
     // TODO add internationalization
+    /**
+     * Displays an AlertDialog that allows the user to create a new list
+     * by entering its name. Handles validation and calls logic to add
+     * the list if input is valid.
+     */
     private void showAddListDialog() {
-        // Create a LinearLayout container with vertical orientation
-        LinearLayout container = new LinearLayout(NewTaskActivity.this);
-        container.setOrientation(LinearLayout.VERTICAL);
+        EditText input = DialogUtils.createStyledEditText(this, "Enter list name", null);
 
-        // Convert dp values to pixels: horizontal margin and top margin
-        int horizontalMargin = (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
-        int topMargin = (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics());
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("New List")
+                .setView(wrapInVerticalContainer(input))
+                .setPositiveButton("Add", null)
+                .setNegativeButton("Cancel", (d, w) -> d.dismiss())
+                .create();
 
-        // Create layout parameters for EditText with margins
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-        lp.setMargins(horizontalMargin, topMargin, horizontalMargin, 0);
-
-        // Create the EditText and apply layout parameters
-        final EditText input = new EditText(NewTaskActivity.this);
-        input.setHint("Enter list name");
-        input.setLayoutParams(lp);
-        container.addView(input);
-
-        // Build the dialog with the custom container
-        AlertDialog.Builder builder = new AlertDialog.Builder(NewTaskActivity.this);
-        builder.setTitle("New List")
-                .setView(container)
-                .setPositiveButton("Add", null)  // Override later
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-        final AlertDialog dialog = builder.create();
-
-        // Override the positive button’s behavior
-        dialog.setOnShowListener(dialogInterface -> {
-            Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-            positiveButton.setOnClickListener(view -> {
-                String listName = input.getText().toString().trim();
-                if (listName.isEmpty()) {
-                    Toast.makeText(NewTaskActivity.this, "List name cannot be empty", Toast.LENGTH_SHORT).show();
+        dialog.setOnShowListener(d -> {
+            Button addButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            addButton.setOnClickListener(v -> {
+                String name = input.getText().toString().trim();
+                if (name.isEmpty()) {
+                    Toast.makeText(this, "List name cannot be empty", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Extracted the duplicate check and insertion logic into another method
-                    validateAndAddList(listName, dialog);
+                    validateAndAddList(name, dialog);
                 }
             });
         });
 
         dialog.show();
+        KeyboardUtils.showKeyboard(this, input);
     }
+
 
     /**
      * Checks if a list with the given name already exists. If it does, shows a warning;
@@ -396,16 +383,6 @@ public class NewTaskActivity extends AppCompatActivity {
                 btnAddToList.setText(newListName);
             });
         }).start();
-    }
-
-    private void hideKeyboard(@NonNull View v) {
-        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                .hideSoftInputFromWindow(v.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    private void showKeyboard() {
-        ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE))
-                .toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
     private void hideTimeSelectorSection() {
@@ -452,4 +429,10 @@ public class NewTaskActivity extends AppCompatActivity {
         imgBtnClearTime.setVisibility(View.VISIBLE);
     }
 
+    private View wrapInVerticalContainer(View child) {
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.addView(child);
+        return container;
+    }
 }

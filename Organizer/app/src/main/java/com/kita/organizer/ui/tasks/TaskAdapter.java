@@ -1,5 +1,7 @@
 package com.kita.organizer.ui.tasks;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -14,9 +16,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.kita.organizer.R;
+import com.kita.organizer.data.db.OrganizerDatabase;
+import com.kita.organizer.data.entity.CompletedTaskEntity;
+import com.kita.organizer.data.entity.ListEntity;
 import com.kita.organizer.data.entity.TaskEntity;
-import com.kita.organizer.ui.lists.ListAdapter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +47,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     static class TaskViewHolder extends RecyclerView.ViewHolder {
-        // References for UI elements for binding
+        // Define views in the item_task.xml layout
         CheckBox taskCheckBox;
         TextView taskText;
         TextView taskDate;
@@ -61,10 +66,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             // Set the task text
             taskText.setText(taskEntity.getText());
 
-            // Optionally set the date or checkbox state if needed.
-            // taskDate.setText(taskEntity.getDate());
-            // taskCheckBox.setChecked(taskEntity.isCompleted());
-
             // Set a click listener on the entire itemView.
             // Note: The performClick() call in the touch listener will trigger this.
             itemView.setOnClickListener(v -> {
@@ -72,13 +73,59 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                     listener.onTaskClick(taskEntity);
                 }
             });
+
+            // Extracted checkbox logic is now handled in a separate method.
+            taskCheckBox.setOnClickListener(v -> showCompleteTaskDialog(taskEntity));
+        }
+
+        /**
+         * Handles the checkbox click -> complete task action.
+         * Displays an AlertDialog asking the user to confirm task completion.
+         * If confirmed, the task is moved from Tasks to CompletedTasks in the database.
+         *
+         * @param taskEntity the task to be completed
+         */
+        private void showCompleteTaskDialog(TaskEntity taskEntity) {
+            Context context = itemView.getContext();
+            new AlertDialog.Builder(context)
+                    .setTitle("Mark as Complete?")
+                    .setNegativeButton("No", (dialog, which) -> {
+                        dialog.dismiss();
+                        // Uncheck the checkbox if user selects "No"
+                        taskCheckBox.setChecked(false);
+                    })
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        // Execute database operations on a background thread.
+                        new Thread(() -> {
+                            OrganizerDatabase database = OrganizerDatabase.getInstance(context);
+                            // Retrieve the list name using the list id.
+                            ListEntity listEntity = database.listDao().getById(taskEntity.getListId());
+                            String listName = (listEntity != null) ? listEntity.getName() : "";
+
+                            // Create a CompletedTaskEntity with the current date as the completion date.
+                            CompletedTaskEntity completedTask = new CompletedTaskEntity(
+                                    taskEntity.getText(),
+                                    taskEntity.getDate(),
+                                    taskEntity.getTime(),
+                                    taskEntity.getRepeatOption(),
+                                    taskEntity.getListId(),
+                                    listName,
+                                    LocalDate.now()
+                            );
+
+                            // Insert into CompletedTasks and delete from Tasks.
+                            database.completedTaskDao().insert(completedTask);
+                            database.taskDao().delete(taskEntity);
+                        }).start();
+                    })
+                    .show();
         }
     }
 
     @NonNull
     @Override
     public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Inflate the new item_task.xml layout
+        // Inflate the new item_task.xml layout.
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_task, parent, false);
         return new TaskViewHolder(view);
@@ -111,11 +158,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     private void setClickBounceAnimation(@NonNull TaskViewHolder holder) {
-        // Add touch listener for the "small-and-big" (bounce) animation
+        // Add touch listener for the "small-and-big" (bounce) animation.
         holder.itemView.setOnTouchListener((view, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    // Scale down very gently
                     view.animate()
                             .scaleX(0.98f)
                             .scaleY(0.98f)
@@ -124,7 +170,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                             .start();
                     break;
                 case MotionEvent.ACTION_UP:
-                    // On release, do a smooth pop (slightly overscaled) then settle back
                     view.animate()
                             .scaleX(1.02f)
                             .scaleY(1.02f)
@@ -139,7 +184,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                             .start();
                     break;
                 case MotionEvent.ACTION_CANCEL:
-                    // If cancelled, return smoothly to normal scale
                     view.animate()
                             .scaleX(1f)
                             .scaleY(1f)
@@ -152,5 +196,4 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             return false; // Let ripple and click events proceed.
         });
     }
-
 }
