@@ -59,7 +59,10 @@ public class CompletedTaskAdapter extends RecyclerView.Adapter<CompletedTaskAdap
             taskText.setText(taskEntity.getText());
 
             // Concatenate the original date and time as in TaskAdapter.
-            String dateTime = taskEntity.getDate().toString() + " " + taskEntity.getTime().toString();
+            String dateTime = (taskEntity.getDate() != null ? taskEntity.getDate().toString() : "No date") +
+                    " " +
+                    (taskEntity.getTime() != null ? taskEntity.getTime().toString() : "No time");
+
             taskDate.setText(dateTime);
 
             // Set the restored list name.
