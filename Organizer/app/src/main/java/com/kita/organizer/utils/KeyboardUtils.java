@@ -8,7 +8,7 @@ import android.view.inputmethod.InputMethodManager;
 
 public class KeyboardUtils {
 
-    private static final int KEYBOARD_DELAY_MS = 50; // Adjust the delay if needed
+    private static final int KEYBOARD_DELAY_MS = 100; // Adjust the delay if needed
 
     /**
      * Shows the keyboard for a given view with a slight delay to ensure UI initialization.
