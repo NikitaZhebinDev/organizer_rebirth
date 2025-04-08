@@ -17,49 +17,54 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kita.organizer.NewTaskActivity;
 import com.kita.organizer.R;
-import com.kita.organizer.data.db.OrganizerDatabase;
-import com.kita.organizer.data.entity.TaskEntity;
 import com.kita.organizer.databinding.FragmentTasksBinding;
 
-import java.util.List;
-
 public class TasksFragment extends Fragment {
-
     private FragmentTasksBinding binding;
     private RecyclerView recyclerView;
     private TaskAdapter taskAdapter;
     private TasksViewModel tasksViewModel;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentTasksBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         tasksViewModel = new ViewModelProvider(this).get(TasksViewModel.class);
 
+        // Set up the FloatingActionButton with animation
         Animation animClickFloatBtn = AnimationUtils.loadAnimation(getContext(), R.anim.press_float_btn);
         animClickFloatBtn.setAnimationListener(new Animation.AnimationListener() {
-            @Override public void onAnimationStart(Animation animation) {}
-            @Override public void onAnimationRepeat(Animation animation) {}
+            @Override
+            public void onAnimationStart(Animation animation) {
+                // You can add any start animation logic here, if needed.
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+                // You can add any logic for repeat animation if necessary.
+            }
+
             @Override
             public void onAnimationEnd(Animation animation) {
-                // Start new task activity
+                // Start NewTaskActivity after the animation ends
                 Intent intent = new Intent(getActivity(), NewTaskActivity.class);
                 startActivity(intent);
             }
         });
 
+        // Set click listener on the FloatingActionButton
         FloatingActionButton btnNewTask = binding.btnNewTask;
         btnNewTask.setOnClickListener(v -> btnNewTask.startAnimation(animClickFloatBtn));
 
-        // Set up RecyclerView and fill it with tasks
+        // Set up RecyclerView with TaskAdapter
+        taskAdapter = new TaskAdapter();
+        taskAdapter.setTasksViewModel(tasksViewModel); // Pass ViewModel to adapter
+
         recyclerView = root.findViewById(R.id.recycler_view_tasks);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        taskAdapter = new TaskAdapter();
         recyclerView.setAdapter(taskAdapter);
 
-        // Observe LiveData instead of manually loading
+        // Observe LiveData for automatic UI updates
         tasksViewModel.getTasks().observe(getViewLifecycleOwner(), tasks -> {
             taskAdapter.setTasks(tasks);
         });
@@ -73,21 +78,7 @@ public class TasksFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        tasksViewModel.loadTasks(requireContext()); // Refresh when coming back
-    }
-
-    /**
-     * Load tasks from the database and update the RecyclerView adapter
-     */
-    private void loadTasksFromDatabase() {
-        new Thread(() -> {
-            OrganizerDatabase db = OrganizerDatabase.getInstance(requireContext());
-            List<TaskEntity> taskEntityList = db.taskDao().getAllTasks();  // sort/filter if needed
-
-            requireActivity().runOnUiThread(() -> {
-                taskAdapter.setTasks(taskEntityList);
-            });
-        }).start();
+        tasksViewModel.loadTasks(requireContext());
     }
 
     @Override
@@ -96,3 +87,4 @@ public class TasksFragment extends Fragment {
         binding = null;
     }
 }
+

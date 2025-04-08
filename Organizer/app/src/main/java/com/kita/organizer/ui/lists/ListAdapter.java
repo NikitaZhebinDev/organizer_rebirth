@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.kita.organizer.R;
 import com.kita.organizer.data.dao.ListDao;
 import com.kita.organizer.data.entity.ListEntity;
+import com.kita.organizer.utils.AnimationUtils;
 import com.kita.organizer.utils.DialogUtils;
 import com.kita.organizer.utils.KeyboardUtils;
 
@@ -80,9 +81,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
     public void onBindViewHolder(@NonNull ListViewHolder holder, int position) {
         holder.bind(listItems.get(position), listDao);
 
-        setItemAppearanceAnimation(holder);
-        setClickBounceAnimation(holder);
+        // Use the extracted animation utility methods
+        AnimationUtils.animateItemAppearance(holder.itemView);
+        AnimationUtils.setBounceTouchAnimation(holder.itemView);
     }
+
 
     @Override
     public int getItemCount() {
@@ -143,59 +146,4 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder
                 .show();
     }
 
-
-    private void setItemAppearanceAnimation(@NonNull ListViewHolder holder) {
-        // Animate item appearance
-        holder.itemView.setAlpha(0f);
-        holder.itemView.setTranslationY(50f);
-        holder.itemView.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(300)
-                .setInterpolator(new DecelerateInterpolator())
-                .start();
-    }
-
-    private void setClickBounceAnimation(@NonNull ListViewHolder holder) {
-        // Add touch listener for scale (bounce) animation
-        holder.itemView.setOnTouchListener((view, event) -> {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    // Scale down very gently
-                    view.animate()
-                            .scaleX(0.98f)
-                            .scaleY(0.98f)
-                            .setDuration(120)
-                            .setInterpolator(new DecelerateInterpolator())
-                            .start();
-                    break;
-                case MotionEvent.ACTION_UP:
-                    // On release, do a smooth pop (slightly overscaled) then settle back
-                    view.animate()
-                            .scaleX(1.02f)
-                            .scaleY(1.02f)
-                            .setDuration(75)
-                            .withEndAction(() -> view.animate()
-                                    .scaleX(1f)
-                                    .scaleY(1f)
-                                    .setDuration(150)
-                                    .setInterpolator(new OvershootInterpolator(2f))
-                                    .withEndAction(() -> view.performClick()) // Accessibility: call performClick()
-                                    .start())
-                            .start();
-                    break;
-                case MotionEvent.ACTION_CANCEL:
-                    // If cancelled, return smoothly to normal scale
-                    view.animate()
-                            .scaleX(1f)
-                            .scaleY(1f)
-                            .setDuration(150)
-                            .setInterpolator(new DecelerateInterpolator())
-                            .withEndAction(() -> view.performClick())
-                            .start();
-                    break;
-            }
-            return false; // Let ripple and click events proceed.
-        });
-    }
 }
