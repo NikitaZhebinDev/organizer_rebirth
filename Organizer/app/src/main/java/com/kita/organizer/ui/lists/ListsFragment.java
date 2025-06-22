@@ -18,32 +18,36 @@ import com.kita.organizer.databinding.FragmentListsBinding;
 public class ListsFragment extends Fragment {
 
     private FragmentListsBinding binding;
-    private RecyclerView recyclerView;
-    private ListAdapter listAdapter;
+    private ListsAdapter listsAdapter;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        ListsViewModel listsViewModel =
-                new ViewModelProvider(
-                        this,
-                        ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())
-                ).get(ListsViewModel.class);
+    @Override
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            ViewGroup container,
+            Bundle savedInstanceState) {
 
+        /* 1.  ViewModel as before */
+        ListsViewModel viewModel = new ViewModelProvider(
+                this,
+                ViewModelProvider.AndroidViewModelFactory
+                        .getInstance(requireActivity().getApplication()))
+                .get(ListsViewModel.class);
+
+        /* 2.  ViewBinding */
         binding = FragmentListsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        /*final TextView textView = binding.textGallery;
-        listsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);*/
+        /* 3.  RecyclerView + adapter */
+        RecyclerView rv = root.findViewById(R.id.recyclerViewLists);
+        rv.setLayoutManager(new LinearLayoutManager(requireContext()));
+        listsAdapter = new ListsAdapter(
+                OrganizerDatabase.getInstance(requireContext()).listDao());
+        rv.setAdapter(listsAdapter);
 
-        // Set up RecyclerView and fill it with lists
-        recyclerView = root.findViewById(R.id.recyclerViewLists);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        listAdapter = new ListAdapter(OrganizerDatabase.getInstance(getContext()).listDao());
-        recyclerView.setAdapter(listAdapter);
-
-        listsViewModel.getAllLists().observe(getViewLifecycleOwner(), listEntities -> {
-            listAdapter.setLists(listEntities);
-        });
+        /* 4.  Observe data and push to adapter with submitList() */
+        viewModel.getAllLists()
+                .observe(getViewLifecycleOwner(),
+                        listsAdapter::submitList);
 
         return root;
     }

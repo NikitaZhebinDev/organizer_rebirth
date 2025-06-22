@@ -29,6 +29,7 @@ public class TasksFragment extends Fragment {
         binding = FragmentTasksBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        // Obtain the ViewModel
         tasksViewModel = new ViewModelProvider(this).get(TasksViewModel.class);
 
         // Set up the FloatingActionButton with animation
@@ -36,17 +37,17 @@ public class TasksFragment extends Fragment {
         animClickFloatBtn.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                // You can add any start animation logic here, if needed.
+                // No-op; add start logic if needed.
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-                // You can add any logic for repeat animation if necessary.
+                // No-op; add logic here if necessary.
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                // Start NewTaskActivity after the animation ends
+                // Start NewTaskActivity after animation finishes
                 Intent intent = new Intent(getActivity(), NewTaskActivity.class);
                 startActivity(intent);
             }
@@ -57,17 +58,14 @@ public class TasksFragment extends Fragment {
         btnNewTask.setOnClickListener(v -> btnNewTask.startAnimation(animClickFloatBtn));
 
         // Set up RecyclerView with TaskAdapter
-        taskAdapter = new TaskAdapter();
-        taskAdapter.setTasksViewModel(tasksViewModel); // Pass ViewModel to adapter
-
+        // Note: We pass tasksViewModel to the TaskAdapter constructor.
+        taskAdapter = new TaskAdapter(tasksViewModel);
         recyclerView = root.findViewById(R.id.recycler_view_tasks);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(taskAdapter);
 
-        // Observe LiveData for automatic UI updates
-        tasksViewModel.getTasks().observe(getViewLifecycleOwner(), tasks -> {
-            taskAdapter.setTasks(tasks);
-        });
+        // Observe LiveData for automatic UI updates using submitList()
+        tasksViewModel.getTasks().observe(getViewLifecycleOwner(), taskAdapter::submitList);
 
         // Load tasks initially
         tasksViewModel.loadTasks(requireContext());
@@ -87,4 +85,3 @@ public class TasksFragment extends Fragment {
         binding = null;
     }
 }
-

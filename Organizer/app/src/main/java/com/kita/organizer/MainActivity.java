@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             ListDao listDao = database.listDao();
             if (listDao.getAll().isEmpty()) {
                 listDao.insert(new ListEntity("Default"));
-                listDao.insert(new ListEntity("Personal"));
+                listDao.insert(new ListEntity("Personal")); // TODO inter-tion
                 Log.d(TAG, "Default lists added");
             } else {
                 Log.d(TAG, "Default lists already present");

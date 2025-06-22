@@ -10,6 +10,7 @@ import com.kita.organizer.data.db.Converters;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 
 @Entity(
         tableName = "task",
@@ -78,5 +79,35 @@ public class TaskEntity {
                 ", repeatOption=" + repeatOption +
                 ", listId=" + listId +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        // 1. same reference
+        if (this == o) return true;
+        // 2. null or different class
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TaskEntity that = (TaskEntity) o;
+
+        // 3. once both ids are set, they are authoritative
+        if (this.id != 0 && that.id != 0) {
+            return this.id == that.id;
+        }
+
+        // 4. otherwise compare the "meaningful" columns
+        return listId == that.listId &&
+                Objects.equals(text,  that.text) &&
+                Objects.equals(date,  that.date) &&
+                Objects.equals(time,  that.time) &&
+                repeatOption == that.repeatOption;
+    }
+
+    @Override
+    public int hashCode() {
+        // mirror equals(): id when present, else all business fields
+        return id != 0
+                ? Integer.hashCode(id)
+                : Objects.hash(text, date, time, repeatOption, listId);
     }
 }

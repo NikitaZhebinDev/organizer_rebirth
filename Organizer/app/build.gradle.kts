@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.activity)
+    implementation(libs.recycler.view)
 
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
