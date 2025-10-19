@@ -5,6 +5,11 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
+/***
+ * Deprecated since it causes incorrect margin between elements (tasks/lists) but
+ * TODO that will be fixed in the future (bounce on touch works fine)
+ */
+@Deprecated
 public class AnimationUtils {
 
     /**

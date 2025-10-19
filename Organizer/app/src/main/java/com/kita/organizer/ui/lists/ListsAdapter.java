@@ -89,7 +89,7 @@ public class ListsAdapter
     public void onBindViewHolder(@NonNull ListViewHolder h, int pos) {
         h.bind(getItem(pos), listDao);
 
-        AnimationUtils.animateItemAppearance(h.itemView);
+        /*AnimationUtils.animateItemAppearance(h.itemView);*/
         AnimationUtils.setBounceTouchAnimation(h.itemView);
     }
 

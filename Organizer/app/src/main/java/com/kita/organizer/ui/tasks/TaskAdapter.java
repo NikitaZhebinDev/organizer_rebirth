@@ -123,12 +123,13 @@ public class TaskAdapter extends ListAdapter<TaskEntity, TaskAdapter.TaskViewHol
 
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
+
         // Retrieve the task using getItem() from ListAdapter.
         TaskEntity taskEntity = getItem(position);
         holder.bind(taskEntity, onTaskClickListener, tasksViewModel);
 
         // Apply the custom animations.
-        AnimationUtils.animateItemAppearance(holder.itemView);
+        /*AnimationUtils.animateItemAppearance(holder.itemView);*/
         AnimationUtils.setBounceTouchAnimation(holder.itemView);
     }
 

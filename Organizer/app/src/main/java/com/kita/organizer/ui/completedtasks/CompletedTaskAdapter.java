@@ -88,7 +88,7 @@ public class CompletedTaskAdapter extends RecyclerView.Adapter<CompletedTaskAdap
         holder.bind(taskEntity, onTaskClickListener);
 
         // Use the shared animation utilities
-        AnimationUtils.animateItemAppearance(holder.itemView);
+        /*AnimationUtils.animateItemAppearance(holder.itemView);*/
         AnimationUtils.setBounceTouchAnimation(holder.itemView);
     }
 
