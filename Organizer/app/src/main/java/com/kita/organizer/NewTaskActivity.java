@@ -57,7 +57,8 @@ public class NewTaskActivity extends AppCompatActivity {
     private LocalDate selectedDate;
     private LocalTime selectedTime;
     private Integer selectedRepeatOption = RepeatOption.NO_REPEAT.getValue();
-    private Boolean isEditMode;
+    private boolean isEditMode = false;
+    private int editingTaskId = -1; // default -1 means new task
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,25 +86,32 @@ public class NewTaskActivity extends AppCompatActivity {
         TaskEntity editing = getIntent().getParcelableExtra("EXTRA_TASK");
         if (editing != null) {
             isEditMode = true;
-            //taskId = editing.getId(); todo remove?
+            editingTaskId = editing.getId();
             editTask.setText(editing.getText());
 
+            // date/time null guards
             LocalDate d = editing.getDate();
-            selectedDate = d;
-            updateEditDate(d);
-            showDateBtnClear();
-            showTimeSelectorSection();
+            if (d != null) {
+                selectedDate = d;
+                updateEditDate(d);
+                showDateBtnClear();
+                showTimeSelectorSection();
+            }
 
             LocalTime t = editing.getTime();
-            selectedTime = t;
-            updateEditTime(t);
-            showTimeBtnClear();
-            showRepeatOptionSelectorSection();
+            if (t != null) {
+                selectedTime = t;
+                updateEditTime(t);
+                showTimeBtnClear();
+                showRepeatOptionSelectorSection();
+            }
 
-            selectedRepeatOption = editing.getRepeatOption().getValue();
-            btnRepeat.setText(
-                    getResources().getStringArray(R.array.repeat_options)[selectedRepeatOption]
-            );
+            if (editing.getRepeatOption() != null) {
+                selectedRepeatOption = editing.getRepeatOption().getValue();
+                btnRepeat.setText(
+                        getResources().getStringArray(R.array.repeat_options)[selectedRepeatOption]
+                );
+            }
 
             // Load list name asynchronously (or pass listName in Intent)
             new Thread(() -> {
@@ -293,23 +301,44 @@ public class NewTaskActivity extends AppCompatActivity {
             return;
         }
 
-        String finalTaskText = taskText;
+        final String finalTaskText = taskText;
+        final LocalDate finalDate = date;
+        final LocalTime finalTime = time;
+        final RepeatOption finalRepeat = repeatOption;
+        final String finalListName = listName;
+
         new Thread(() -> {
-            // Create an instance of the ListDao to get the ListEntity by name
-            ListDao listDao = OrganizerDatabase.getInstance(getApplicationContext()).listDao();
-            ListEntity listEntity = listDao.getByName(listName);
+            OrganizerDatabase db = OrganizerDatabase.getInstance(getApplicationContext());
+
+            // resolve list id
+            ListDao listDao = db.listDao();
+            ListEntity listEntity = listDao.getByName(finalListName);
             if (listEntity == null) {
-                // If the ListEntity doesn't exist, fallback to the "Default" list
                 listEntity = listDao.getByName("Default");
             }
+            int listId = (listEntity != null) ? listEntity.getId() : 0;
 
-            TaskEntity taskEntity = new TaskEntity(finalTaskText, date, time, repeatOption, listEntity.getId());
-            TaskDao taskDao = OrganizerDatabase.getInstance(getApplicationContext()).taskDao();
-            taskDao.insert(taskEntity);
+            TaskDao taskDao = db.taskDao();
 
-            runOnUiThread(() -> Toast.makeText(this, "Task added", Toast.LENGTH_SHORT).show());
-            Log.d(TAG, "Task saved: " + taskEntity);
-            runOnUiThread(this::finish); // close NewTaskActivity
+            if (isEditMode && editingTaskId != -1) {
+                // update existing
+                TaskEntity entity = new TaskEntity(finalTaskText, finalDate, finalTime, finalRepeat, listId);
+                entity.setId(editingTaskId);
+                taskDao.update(entity);
+
+                runOnUiThread(() -> Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show());
+            } else {
+                // insert new
+                TaskEntity entity = new TaskEntity(finalTaskText, finalDate, finalTime, finalRepeat, listId);
+                taskDao.insert(entity);
+
+                runOnUiThread(() -> Toast.makeText(this, "Task added", Toast.LENGTH_SHORT).show());
+            }
+
+            Log.d(TAG, "Saved task (editMode=" + isEditMode + "): " + finalTaskText);
+
+            // finish activity and return to list
+            runOnUiThread(this::finish);
         }).start();
     }
 

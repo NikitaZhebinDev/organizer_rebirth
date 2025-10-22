@@ -2,6 +2,7 @@ package com.kita.organizer.ui.tasks;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.kita.organizer.R;
 import com.kita.organizer.data.entity.TaskEntity;
 import com.kita.organizer.utils.AnimationUtils;
+
+import java.util.Objects;
 
 /**
  * TaskAdapter now extends ListAdapter and leverages DiffUtil for automatic minimal updates.
@@ -143,7 +147,26 @@ public class TaskAdapter extends ListAdapter<TaskEntity, TaskAdapter.TaskViewHol
 
                 @Override
                 public boolean areContentsTheSame(@NonNull TaskEntity oldItem, @NonNull TaskEntity newItem) {
-                    return oldItem.equals(newItem);
+                    if (!Objects.equals(oldItem.getText(), newItem.getText())) return false;
+                    if (!Objects.equals(oldItem.getDate(), newItem.getDate())) return false;
+                    if (!Objects.equals(oldItem.getTime(), newItem.getTime())) return false;
+                    if (oldItem.getRepeatOption() != newItem.getRepeatOption()) return false;
+                    if (oldItem.getListId() != newItem.getListId()) return false;
+                    return true;
+                }
+
+                @Nullable
+                @Override
+                public Object getChangePayload(@NonNull TaskEntity oldItem, @NonNull TaskEntity newItem) {
+                    // build a minimal payload of changed fields
+                    Bundle diff = new Bundle();
+                    if (!Objects.equals(oldItem.getText(), newItem.getText())) diff.putString("text", newItem.getText());
+                    if (!Objects.equals(oldItem.getDate(), newItem.getDate())) diff.putSerializable("date", newItem.getDate());
+                    if (!Objects.equals(oldItem.getTime(), newItem.getTime())) diff.putSerializable("time", newItem.getTime());
+                    if (oldItem.getRepeatOption() != newItem.getRepeatOption()) diff.putInt("repeat", newItem.getRepeatOption().getValue());
+                    if (oldItem.getListId() != newItem.getListId()) diff.putInt("listId", newItem.getListId());
+                    return diff.size() == 0 ? null : diff;
                 }
             };
+
 }
