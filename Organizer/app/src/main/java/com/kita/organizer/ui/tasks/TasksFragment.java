@@ -64,6 +64,13 @@ public class TasksFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(taskAdapter);
 
+        // On Task button click
+        taskAdapter.setOnTaskClickListener(task -> {
+            Intent intent = new Intent(getActivity(), NewTaskActivity.class);
+            intent.putExtra("EXTRA_TASK", task); // sends the entire TaskEntity wrapped as Parcelable
+            startActivity(intent);
+        });
+
         // Observe LiveData for automatic UI updates using submitList()
         tasksViewModel.getTasks().observe(getViewLifecycleOwner(), taskAdapter::submitList);
 

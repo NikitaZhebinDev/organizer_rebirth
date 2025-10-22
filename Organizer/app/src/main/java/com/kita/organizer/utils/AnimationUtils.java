@@ -54,7 +54,6 @@ public class AnimationUtils {
                                     .scaleY(1f)
                                     .setDuration(150)
                                     .setInterpolator(new OvershootInterpolator(2f))
-                                    .withEndAction(v::performClick)
                                     .start())
                             .start();
                     break;
@@ -64,7 +63,6 @@ public class AnimationUtils {
                             .scaleY(1f)
                             .setDuration(150)
                             .setInterpolator(new DecelerateInterpolator())
-                            .withEndAction(v::performClick)
                             .start();
                     break;
             }

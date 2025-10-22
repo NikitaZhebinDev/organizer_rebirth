@@ -4,26 +4,19 @@ import static com.kita.organizer.utils.DialogUtils.wrapInVerticalContainer;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -64,6 +57,7 @@ public class NewTaskActivity extends AppCompatActivity {
     private LocalDate selectedDate;
     private LocalTime selectedTime;
     private Integer selectedRepeatOption = RepeatOption.NO_REPEAT.getValue();
+    private Boolean isEditMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +80,41 @@ public class NewTaskActivity extends AppCompatActivity {
 
         googleSpeechService = new GoogleSpeechService(this, speechLauncher);
         googleSpeechService.setSpeechListener(result -> editTask.setText(result));
+
+        // check for EXTRA_TASK. If present, you’re editing; otherwise, you’re creating
+        TaskEntity editing = getIntent().getParcelableExtra("EXTRA_TASK");
+        if (editing != null) {
+            isEditMode = true;
+            //taskId = editing.getId(); todo remove?
+            editTask.setText(editing.getText());
+
+            LocalDate d = editing.getDate();
+            selectedDate = d;
+            updateEditDate(d);
+            showDateBtnClear();
+            showTimeSelectorSection();
+
+            LocalTime t = editing.getTime();
+            selectedTime = t;
+            updateEditTime(t);
+            showTimeBtnClear();
+            showRepeatOptionSelectorSection();
+
+            selectedRepeatOption = editing.getRepeatOption().getValue();
+            btnRepeat.setText(
+                    getResources().getStringArray(R.array.repeat_options)[selectedRepeatOption]
+            );
+
+            // Load list name asynchronously (or pass listName in Intent)
+            new Thread(() -> {
+                String listName = OrganizerDatabase
+                        .getInstance(getApplicationContext())
+                        .listDao()
+                        .getById(editing.getListId())
+                        .getName();
+                runOnUiThread(() -> btnAddToList.setText(listName));
+            }).start();
+        }
 
         // Log the lists present in the database when the app starts
         DatabaseLogger.logListsInDatabase(TAG, getApplicationContext()); // todo remove
@@ -218,11 +247,19 @@ public class NewTaskActivity extends AppCompatActivity {
     }
 
     private void updateEditDate(LocalDate date) {
+        if (date == null) {
+            editDate.setText("");
+            return;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E, MMM dd, yyyy", Locale.getDefault());
         editDate.setText(date.format(formatter));
     }
 
     private void updateEditTime(LocalTime time) {
+        if (time == null) {
+            editTime.setText("");
+            return;
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault());
         editTime.setText(time.format(formatter));
     }

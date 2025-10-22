@@ -18,8 +18,6 @@ import com.kita.organizer.R;
 import com.kita.organizer.data.entity.TaskEntity;
 import com.kita.organizer.utils.AnimationUtils;
 
-import java.util.concurrent.Executors;
-
 /**
  * TaskAdapter now extends ListAdapter and leverages DiffUtil for automatic minimal updates.
  *

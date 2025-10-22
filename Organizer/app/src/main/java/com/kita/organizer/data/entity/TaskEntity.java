@@ -1,5 +1,8 @@
 package com.kita.organizer.data.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
@@ -23,7 +26,7 @@ import java.util.Objects;
         indices = {@Index(value = "listId")} // Create an index for listId
 )
 @TypeConverters({Converters.class})  // Tell Room to use custom converters
-public class TaskEntity {
+public class TaskEntity implements Parcelable {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String text;
@@ -38,6 +41,26 @@ public class TaskEntity {
         this.time = time;
         this.repeatOption = repeatOption;
         this.listId = listId;
+    }
+
+    protected TaskEntity(Parcel in) {
+        id   = in.readInt();
+        text = in.readString();
+
+        // Read back with null‐check
+        String dateStr = in.readString();
+        date = (dateStr != null)
+                ? LocalDate.parse(dateStr)
+                : null;
+
+        String timeStr = in.readString();
+        time = (timeStr != null)
+                ? LocalTime.parse(timeStr)
+                : null;
+
+        int repeatVal = in.readInt();
+        repeatOption = RepeatOption.fromValue(repeatVal);
+        listId       = in.readInt();
     }
 
     public void setId(int id) {
@@ -110,4 +133,32 @@ public class TaskEntity {
                 ? Integer.hashCode(id)
                 : Objects.hash(text, date, time, repeatOption, listId);
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(text);
+        // Null-safe writes:
+        dest.writeString(date  != null ? date.toString() : null);
+        dest.writeString(time  != null ? time.toString() : null);
+        dest.writeInt(repeatOption != null
+                ? repeatOption.getValue()
+                : RepeatOption.NO_REPEAT.getValue());
+        dest.writeInt(listId);
+    }
+
+    @Override
+    public int describeContents() { return 0; }
+
+    public static final Parcelable.Creator<TaskEntity> CREATOR = new Parcelable.Creator<TaskEntity>() {
+        @Override
+        public TaskEntity createFromParcel(Parcel in) {
+            return new TaskEntity(in);
+        }
+        @Override
+        public TaskEntity[] newArray(int size) {
+            return new TaskEntity[size];
+        }
+    };
+
 }
